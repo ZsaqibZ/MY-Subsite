@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EngiSimulation Tools | Offline Problem Solvers</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="EngiSimulation.png" />
+    
+    <meta name="description" content="Download offline engineering tools and utilities from EngiSimulation. Solve problems faster with standalone applications."/>
+    <meta name="keywords" content="Engineering Tools, Offline Tools, MATLAB Tools, Engineering Utilities, Problem Solvers" />
+    
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            background-color: #1a1a1a;
+            scroll-behavior: smooth;
+        }
+        
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: #444;
+            border-radius: 10px;
+            border: 2px solid #1a1a1a;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: #666;
+        }
+
+        body {
+            overflow-x: hidden;
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1a1a1a, #2e2e2e);
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+
+        header {
+            background: #1a1a1a;
+            padding: 1.5rem 1.2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #42a5f5;
+            margin: 0 0 0.5rem;
+        }
+
+        header h1 a {
+            color: #42a5f5;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        header h1 a:hover {
+            color: #90caf9;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: #aaaaaa;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        main {
+            padding: 3rem 2rem;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #444;
+            margin: 3rem 0;
+        }
+
+        /* Hero Section */
+        .value-prop {
+            text-align: center;
+            padding: 2rem 0;
+        }
+
+        .value-prop h2 {
+            font-size: 2.2rem;
+            font-weight: 600;
+            color: #42a5f5;
+            margin-bottom: 1rem;
+        }
+
+        .value-prop p {
+            font-size: 1.2rem;
+            color: #e0e0e0;
+            max-width: 800px;
+            margin: 0 auto 2rem;
+            line-height: 1.6;
+        }
+
+        .value-prop ul {
+            list-style: none;
+            padding: 0;
+            max-width: 700px;
+            margin: 0 auto;
+            text-align: left;
+        }
+
+        .value-prop ul li {
+            font-size: 1.1rem;
+            margin: 1rem 0;
+            padding-left: 0;
+        }
+
+        /* CTA Button */
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #42a5f5, #5c8fd6);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 12px rgba(66, 165, 245, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(66, 165, 245, 0.5);
+            background: linear-gradient(135deg, #5c8fd6, #42a5f5);
+        }
+
+        /* Tool Showcase */
+        .tool-showcase h2 {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #42a5f5;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .tool-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .tool-card {
+            background: linear-gradient(135deg, #2b2b2b, #3a3a3a);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+        }
+
+        .tool-card h3 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #90caf9;
+            margin: 0 0 1rem;
+        }
+
+        .tool-card p {
+            font-size: 1rem;
+            color: #ddd;
+            margin: 0 0 1rem;
+            flex-grow: 1;
+        }
+
+        .category {
+            display: inline-block;
+            background-color: rgba(66, 165, 245, 0.15);
+            color: #42a5f5;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .download-link {
+            display: inline-block;
+            background: linear-gradient(135deg, #e57399, #d16587);
+            color: white;
+            padding: 0.7rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .download-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(229, 115, 153, 0.4);
+            background: linear-gradient(135deg, #d16587, #e57399);
+        }
+
+        /* Categories Section */
+        #categories h2 {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #42a5f5;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        #categories h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #90caf9;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .category-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .category-item {
+            background: linear-gradient(135deg, #2b2b2b, #3a3a3a);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-decoration: none;
+            color: #e0e0e0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            display: block;
+        }
+
+        .category-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+        }
+
+        .category-item h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #90caf9;
+            margin: 0 0 0.5rem;
+        }
+
+        .category-item p {
+            font-size: 0.95rem;
+            color: #ddd;
+            margin: 0;
+        }
+
+        #categories ul {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 2rem;
+        }
+
+        #categories ul li {
+            margin: 0.8rem 0;
+        }
+
+        #categories ul li a {
+            color: #e0e0e0;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            display: inline-block;
+            border-radius: 6px;
+            background-color: rgba(40, 40, 40, 0.6);
+            transition: all 0.3s ease;
+        }
+
+        #categories ul li a:hover {
+            background-color: rgba(66, 165, 245, 0.15);
+            color: #42a5f5;
+            transform: translateX(5px);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            background: #1f1f1f;
+            color: #aaaaaa;
+            padding: 2rem 1rem;
+            font-size: 0.9rem;
+            box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.3);
+            margin-top: 3rem;
+        }
+
+        footer p {
+            margin: 0.5rem 0;
+        }
+
+        footer nav {
+            margin-top: 1rem;
+        }
+
+        footer nav a {
+            color: #42a5f5;
+            text-decoration: none;
+            margin: 0 0.5rem;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        footer nav a:hover {
+            color: #e57399;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+
+            main {
+                padding: 2rem 1rem;
+            }
+
+            header h1 {
+                font-size: 1.6rem;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+
+            .value-prop h2 {
+                font-size: 1.8rem;
+            }
+
+            .value-prop p {
+                font-size: 1.1rem;
+            }
+
+            .tool-grid,
+            .category-list {
+                grid-template-columns: 1fr;
+            }
+
+            .cta-button {
+                padding: 0.8rem 1.5rem;
+                font-size: 1rem;
+            }
+
+            .tool-card h3 {
+                font-size: 1.2rem;
+            }
+
+            #categories h2 {
+                font-size: 1.7rem;
+            }
+
+            .value-prop ul {
+                padding: 0 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            header {
+                padding: 1rem;
+            }
+
+            header h1 {
+                font-size: 1.4rem;
+            }
+
+            .subtitle {
+                font-size: 0.9rem;
+            }
+
+            .value-prop h2 {
+                font-size: 1.5rem;
+            }
+
+            .value-prop p {
+                font-size: 1rem;
+            }
+
+            .tool-card {
+                padding: 1.2rem;
+            }
+
+            .download-link {
+                padding: 0.6rem 1.2rem;
+                font-size: 0.95rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="container">
+            <h1><a href="/">🛠️ EngiSimulation Tools</a></h1>
+            <p class="subtitle">Your Offline Toolkit for Niche Problems.</p>
+        </div>
+    </header>
+
+    <main class="container">
+
+        <section id="hero" class="value-prop">
+            <h2>Solve Your Stuck Moments Faster.</h2>
+            <p>Simple, standalone applications designed to cut through complexity in academics, development, and DIY projects. <strong>Download the exact solution you need—no internet required.</strong></p>
+            <a href="#featured-tools" class="cta-button">See Featured Downloads</a>
+        </section>
+
+        <hr>
+
+        <section id="featured-tools" class="tool-showcase">
+            <h2>⭐ Featured Tools</h2>
+            <div class="tool-grid">
+                
+                <article class="tool-card">
+                    <h3>Equation Simplifier v1.0</h3>
+                    <p>Instantly simplifies complex algebraic and trigonometric expressions. Built to handle specific forms that standard calculators struggle with.</p>
+                    <span class="category">Academic & Math</span>
+                    <a href="downloads/equation_simplifier.exe" class="download-link">Download (.exe)</a>
+                </article>
+
+                <article class="tool-card">
+                    <h3>Bulk File Renamer</h3>
+                    <p>Rename hundreds of files in a folder based on custom patterns (dates, sequences, prefixes) with a simple GUI.</p>
+                    <span class="category">Utility & Data</span>
+                    <a href="downloads/file_renamer.exe" class="download-link">Download (.exe)</a>
+                </article>
+
+                <article class="tool-card">
+                    <h3>Hyper-Custom Pomodoro</h3>
+                    <p>Set non-standard work/break cycles (e.g., 52 min work / 17 min break) to optimize deep work sessions.</p>
+                    <span class="category">Productivity</span>
+                    <a href="downloads/pomodoro_timer.exe" class="download-link">Download (.exe)</a>
+                </article>
+
+            </div>
+        </section>
+
+        <hr>
+
+        <section id="categories">
+            <h2>Browse All 100+ Tools by Category</h2>
+            <div class="category-list">
+                
+                <a href="#academic" class="category-item">
+                    <h3>➗ Academic & STEM</h3>
+                    <p>Math, Science, and Study Help (e.g., Unit Converters)</p>
+                </a>
+                
+                <a href="#dev" class="category-item">
+                    <h3>💻 Utility & Dev</h3>
+                    <p>Coding, Data Handling, and Formatting (e.g., JSON Validation)</p>
+                </a>
+                
+                <a href="#writing" class="category-item">
+                    <h3>✍️ Writing & Content</h3>
+                    <p>Grammar, Structure, and Creative Inspiration</p>
+                </a>
+
+            </div>
+            
+            <h3 id="academic">Academic & STEM Tools</h3>
+            <ul>
+                <li><a href="downloads/unit_converter.exe">Unit Converter (Scientific)</a></li>
+                <li><a href="downloads/grade_predictor.exe">Grade Predictor</a></li>
+            </ul>
+
+            <h3 id="dev">Utility & Dev Tools</h3>
+            <ul>
+                <li><a href="downloads/json_validator.exe">JSON Formatter & Validator</a></li>
+                <li><a href="downloads/regex_tester.exe">Offline Regex Tester</a></li>
+            </ul>
+            
+        </section>
+
+        <hr>
+
+        <section id="offline-value" class="value-prop">
+            <h2>Why Choose Our Offline Tools?</h2>
+            <ul>
+                <li>🚀 <strong>Instant Speed:</strong> No server lag or browser loading. Run applications instantly.</li>
+                <li>🔒 <strong>Maximum Privacy:</strong> Your sensitive formulas, files, and data never leave your computer.</li>
+                <li>💡 <strong>Zero Distraction:</strong> Simple interfaces designed for one job, and one job only.</li>
+            </ul>
+        </section>
+
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 EngiSimulation. All rights reserved.</p>
+            <nav>
+                <a href="/about">About</a> | 
+                <a href="/contact">Contact</a> | 
+                <a href="/suggest-tool">Suggest a Tool</a>
+            </nav>
+        </div>
+    </footer>
+
+</body>
+</html>
