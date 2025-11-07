@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Citation Formatter (APA, MLA, Chicago) | EngiSimulation Tools</title>
+    <style>
+        /* Basic Styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .container {
+            max-width: 700px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #0056b3;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 10px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .results-section {
+            margin-top: 30px;
+            padding: 20px;
+            border-top: 2px dashed #ccc;
+        }
+        .citation-output {
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+        .style-label {
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 5px;
+            display: block;
+        }
+        /* Citation specific formatting (e.g., italics) */
+        .italic {
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>📚 Citation Formatter (Book Example)</h2>
+        <p>Enter the details of your source and get instant formatting in APA, MLA, and Chicago styles.</p>
+
+        <div class="input-group">
+            <label for="author">Author's Last Name, First Initial (e.g., Smith, J.):</label>
+            <input type="text" id="author" placeholder="e.g., Salinger, J.D." oninput="formatCitations()">
+        </div>
+
+        <div class="input-group">
+            <label for="year">Year of Publication:</label>
+            <input type="text" id="year" placeholder="e.g., 1951" oninput="formatCitations()">
+        </div>
+
+        <div class="input-group">
+            <label for="title">Title of Book:</label>
+            <input type="text" id="title" placeholder="e.g., The Catcher in the Rye" oninput="formatCitations()">
+        </div>
+
+        <div class="input-group">
+            <label for="publisher">Publisher Name:</label>
+            <input type="text" id="publisher" placeholder="e.g., Little, Brown and Company" oninput="formatCitations()">
+        </div>
+
+        <div class="input-group">
+            <label for="city">City of Publication (Chicago only):</label>
+            <input type="text" id="city" placeholder="e.g., New York" oninput="formatCitations()">
+        </div>
+
+        <div class="results-section">
+            <h3>Formatted Citations:</h3>
+
+            <div class="citation-output">
+                <span class="style-label">APA 7th Edition (Reference List):</span>
+                <p id="output-apa"></p>
+            </div>
+
+            <div class="citation-output">
+                <span class="style-label">MLA 9th Edition (Works Cited):</span>
+                <p id="output-mla"></p>
+            </div>
+
+            <div class="citation-output">
+                <span class="style-label">Chicago 17th Edition (Bibliography):</span>
+                <p id="output-chicago"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function formatCitations() {
+            // Get raw inputs
+            const rawAuthor = document.getElementById('author').value.trim();
+            const rawYear = document.getElementById('year').value.trim();
+            const rawTitle = document.getElementById('title').value.trim();
+            const rawPublisher = document.getElementById('publisher').value.trim();
+            const rawCity = document.getElementById('city').value.trim();
+
+            // Split Author into components (simple assumption: Last, First Initial)
+            let authorLast = '';
+            let authorInitials = '';
+            let authorFirst = '';
+            
+            if (rawAuthor.includes(',')) {
+                const parts = rawAuthor.split(',');
+                authorLast = parts[0].trim();
+                
+                // Attempt to get the initial/first name
+                const initialPart = parts[1].trim();
+                if (initialPart.includes('.')) {
+                    // Assumes a period means it's an initial (e.g., J.D.)
+                    authorInitials = initialPart;
+                } else {
+                    // Assumes it's a full first name (e.g., Jerome)
+                    authorFirst = initialPart;
+                }
+            } else {
+                 authorLast = rawAuthor; // Fallback if no comma is used
+            }
+
+            // Capitalize Title for MLA/Chicago (simple way, requires user to check capitalization)
+            const titleMLA = '<span class="italic">' + rawTitle + '</span>.';
+            const titleChicago = '<span class="italic">' + rawTitle + '</span>.';
+            
+            // Format Title for APA (Sentence case, italicized)
+            let titleAPA = rawTitle.toLowerCase();
+            if (titleAPA.length > 0) {
+                titleAPA = titleAPA.charAt(0).toUpperCase() + titleAPA.slice(1);
+            }
+            titleAPA = '<span class="italic">' + titleAPA + '</span>';
+
+
+            // --- APA 7th Edition Format (Book) ---
+            // Format: Author, A. A. (Year). Title of book. Publisher.
+            let apa = '';
+            if (authorLast && (authorInitials || authorFirst) && rawYear && rawTitle && rawPublisher) {
+                const apaAuthor = `${authorLast}, ${authorInitials || authorFirst.charAt(0) + '.'}`;
+                apa = `${apaAuthor} (${rawYear}). ${titleAPA}. ${rawPublisher}.`;
+            } else {
+                apa = 'Missing required APA fields (Author, Year, Title, Publisher).';
+            }
+            document.getElementById('output-apa').innerHTML = apa;
+
+
+            // --- MLA 9th Edition Format (Book) ---
+            // Format: Last Name, First Name/Initial. Title of Book. Publisher, Year.
+            let mla = '';
+            if (authorLast && rawTitle && rawPublisher && rawYear) {
+                const mlaAuthor = `${authorLast}, ${authorFirst || authorInitials}.`;
+                mla = `${mlaAuthor} ${titleMLA} ${rawPublisher}, ${rawYear}.`;
+            } else {
+                mla = 'Missing required MLA fields (Author, Title, Publisher, Year).';
+            }
+            document.getElementById('output-mla').innerHTML = mla;
+
+
+            // --- Chicago 17th Edition Format (Bibliography) ---
+            // Format: Last Name, First Name/Initial. Year. Title of Book. City: Publisher.
+            let chicago = '';
+            if (authorLast && rawTitle && rawYear && rawPublisher && rawCity) {
+                const chgAuthor = `${authorLast}, ${authorFirst || authorInitials}.`;
+                chicago = `${chgAuthor} ${rawYear}. ${titleChicago} ${rawCity}: ${rawPublisher}.`;
+            } else {
+                chicago = 'Missing required Chicago fields (Author, Year, Title, Publisher, City).';
+            }
+            document.getElementById('output-chicago').innerHTML = chicago;
+        }
+
+        // Initialize on load to show instructions/placeholders
+        document.addEventListener('DOMContentLoaded', formatCitations);
+    </script>
+
+</body>
+</html>

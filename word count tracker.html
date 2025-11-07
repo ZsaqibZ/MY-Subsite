@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Count Target Tracker | EngiSimulation Tools</title>
+    <style>
+        /* Basic Styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .container {
+            max-width: 700px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #0056b3;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 10px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="number"] {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        textarea {
+            width: 100%;
+            min-height: 250px;
+            padding: 15px;
+            border: 2px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 1.1em;
+            resize: vertical;
+        }
+        .stats-bar {
+            margin-top: 15px;
+            padding: 15px;
+            border: 2px solid #28a745;
+            background-color: #e2ffe8;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .stat-item {
+            text-align: center;
+            flex: 1;
+            padding: 0 10px;
+        }
+        .stat-item strong {
+            display: block;
+            font-size: 1.5em;
+            color: #0056b3;
+        }
+        #progress {
+            height: 15px;
+            background-color: #ccc;
+            border-radius: 8px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+        #progressBar {
+            height: 100%;
+            width: 0%;
+            background-color: #28a745;
+            transition: width 0.3s;
+        }
+        .target-reached {
+            background-color: #008000 !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>📝 Word Count Target Tracker</h2>
+        <p>Set a goal and start writing. Track your progress in real-time.</p>
+
+        <div class="input-group">
+            <label for="targetCount">Word Count Goal:</label>
+            <input type="number" id="targetCount" value="500" min="1" oninput="updateTracker()">
+        </div>
+
+        <label for="writingArea">Your Document:</label>
+        <textarea id="writingArea" oninput="updateTracker()" placeholder="Start typing or paste your content here..."></textarea>
+
+        <div class="stats-bar">
+            <div class="stat-item">
+                <strong><span id="currentWords">0</span></strong>
+                Words Written
+            </div>
+            <div class="stat-item">
+                <strong><span id="remainingWords">500</span></strong>
+                Words Remaining
+            </div>
+            <div class="stat-item">
+                <strong><span id="targetDisplay">500</span></strong>
+                Goal
+            </div>
+        </div>
+
+        <div id="progress">
+            <div id="progressBar"></div>
+        </div>
+        
+    </div>
+
+    <script>
+        function getWordCount(text) {
+            // Trim whitespace from both ends of a string
+            text = text.trim();
+            
+            // If the string is empty, return 0
+            if (text === "") {
+                return 0;
+            }
+            
+            // Split the string by any whitespace (spaces, tabs, newlines) and filter out empty strings
+            const words = text.split(/\s+/).filter(word => word.length > 0);
+            return words.length;
+        }
+
+        function updateTracker() {
+            const writingArea = document.getElementById('writingArea');
+            const targetCountInput = document.getElementById('targetCount');
+            
+            const currentCount = getWordCount(writingArea.value);
+            const targetCount = parseInt(targetCountInput.value) || 0; // Handle invalid target
+
+            const remaining = targetCount - currentCount;
+            let percentage = 0;
+
+            if (targetCount > 0) {
+                percentage = Math.min(100, (currentCount / targetCount) * 100);
+            }
+
+            // Update display elements
+            document.getElementById('currentWords').textContent = currentCount;
+            document.getElementById('remainingWords').textContent = Math.max(0, remaining);
+            document.getElementById('targetDisplay').textContent = targetCount;
+            
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = percentage + '%';
+            
+            // Change color if goal is reached
+            if (currentCount >= targetCount && targetCount > 0) {
+                progressBar.classList.add('target-reached');
+            } else {
+                progressBar.classList.remove('target-reached');
+            }
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', updateTracker);
+    </script>
+
+</body>
+</html>

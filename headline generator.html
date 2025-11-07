@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Headline Generator | EngiSimulation Tools</title>
+    <style>
+        /* Basic Styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .container {
+            max-width: 700px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #0056b3;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 10px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .results-section {
+            margin-top: 30px;
+            padding: 20px;
+            border: 2px solid #ffc107;
+            border-radius: 4px;
+            background-color: #fff9e6;
+        }
+        .headline-output {
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #fff;
+            border-left: 5px solid #0056b3;
+            border-radius: 4px;
+            font-size: 1.1em;
+        }
+        .headline-type {
+            font-size: 0.8em;
+            color: #666;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .keyword-highlight {
+            font-weight: bold;
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>💡 Headline Generator</h2>
+        <p>Input your main keywords and numbers to generate compelling headline formulas instantly.</p>
+
+        <div class="input-group">
+            <label for="keyword1">Main Topic/Keyword (e.g., Python, Budgeting):</label>
+            <input type="text" id="keyword1" value="Python" placeholder="Main keyword" required>
+
+            <label for="keyword2">Benefit/Secondary Keyword (e.g., speed, save money):</label>
+            <input type="text" id="keyword2" value="Automation" placeholder="Secondary keyword or benefit" required>
+            
+            <label for="number1">Key Number (e.g., 5, 7, 10):</label>
+            <input type="number" id="number1" value="7" min="1" required>
+
+            <label for="adjective">Power Adjective (e.g., effortless, essential):</label>
+            <input type="text" id="adjective" value="essential" placeholder="Adjective" required>
+            
+            <button onclick="generateHeadlines()">Generate Headlines</button>
+        </div>
+
+        <div class="results-section">
+            <h3>Generated Headline Ideas:</h3>
+            <div id="headlineOutput">
+                Enter your keywords above and click 'Generate Headlines'.
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function generateHeadlines() {
+            const K1 = document.getElementById('keyword1').value.trim();
+            const K2 = document.getElementById('keyword2').value.trim();
+            const N1 = document.getElementById('number1').value.trim();
+            const ADJ = document.getElementById('adjective').value.trim();
+            const outputDiv = document.getElementById('headlineOutput');
+            
+            // Utility function to format keywords
+            const format = (text) => `<span class="keyword-highlight">${text}</span>`;
+            
+            if (!K1 || !K2 || !N1 || !ADJ) {
+                 outputDiv.innerHTML = '<p style="color:red;">Please fill in all input fields.</p>';
+                 return;
+            }
+
+            // Define headline formulas
+            const formulas = [
+                {
+                    type: "List Post (Power)",
+                    formula: `${format(N1)} ${format(ADJ)} Ways to Achieve ${format(K2)} with ${format(K1)}`
+                },
+                {
+                    type: "The 'How-To' Guide",
+                    formula: `How to Use ${format(K1)} for ${format(K2)} (The ${format(ADJ)} Guide)`
+                },
+                {
+                    type: "The Question/Intrigue",
+                    formula: `Are You Making These ${format(N1)} ${format(K1)} Mistakes That Kill Your ${format(K2)}?`
+                },
+                {
+                    type: "The Ultimate/Resource",
+                    formula: `The Ultimate ${format(K1)} Checklist for ${format(K2)} Success in ${new Date().getFullYear()}`
+                },
+                {
+                    type: "The Secret/Why",
+                    formula: `The ${format(ADJ)} Secret to ${format(K2)} That Only ${format(N1)} Experts Know`
+                },
+                {
+                    type: "The Time Saver",
+                    formula: `Stop Wasting Time: ${format(N1)} ${format(K1)} Shortcuts for Instant ${format(K2)}`
+                }
+            ];
+
+            // Generate HTML output
+            let html = '';
+            formulas.forEach(item => {
+                html += `
+                    <div class="headline-output">
+                        <span class="headline-type">${item.type}:</span>
+                        ${item.formula}
+                    </div>
+                `;
+            });
+
+            outputDiv.innerHTML = html;
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', generateHeadlines);
+    </script>
+
+</body>
+</html>

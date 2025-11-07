@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Passive Voice Finder | EngiSimulation Tools</title>
+    <style>
+        /* Basic Styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #0056b3;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 10px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 1.1em;
+            resize: vertical;
+            margin-bottom: 15px;
+        }
+        button {
+            background-color: #dc3545;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #c82333;
+        }
+        .results-section {
+            margin-top: 30px;
+            padding: 20px;
+            border: 2px solid #ffc107;
+            border-radius: 4px;
+            background-color: #fff9e6;
+        }
+        #highlightedOutput {
+            line-height: 1.8;
+            font-size: 1.1em;
+        }
+        .passive {
+            background-color: #ffc107; /* Yellow highlight */
+            padding: 1px 3px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        #stats {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>✍️ Passive Voice Finder</h2>
+        <p>Paste your text below and click 'Check' to highlight potential instances of passive voice (forms of 'to be' + past participle).</p>
+
+        <label for="textInput">Your Text:</label>
+        <textarea id="textInput" oninput="clearHighlight()" placeholder="Paste your essay, report, or document here..."></textarea>
+        
+        <button onclick="findPassiveVoice()">Check for Passive Voice</button>
+
+        <div class="results-section">
+            <h3>Highlighted Output:</h3>
+            <div id="highlightedOutput">
+                Click 'Check for Passive Voice' to see the results.
+            </div>
+            <p id="stats"></p>
+        </div>
+
+    </div>
+
+    <script>
+        // List of all forms of the verb "to be"
+        const formsOfBe = [
+            'is', 'am', 'are', 'was', 'were', 'be', 'being', 'been'
+        ];
+
+        // Simple regex to find a "to be" form followed by another word (potential past participle)
+        // This regex is imperfect but covers the majority of cases for a simple tool.
+        // It looks for any 'to be' form (case insensitive) surrounded by word boundaries, followed by a space and another word.
+        const passiveRegex = new RegExp(
+            `\\b(${formsOfBe.join('|')})\\s+([a-z]+ed|\\w+en|\\w+wn|\\w+t|\\w+ne)\\b`, 
+            'gi' // global and case-insensitive
+        );
+        
+        // --- NOTE on the Regex ---
+        // The second group captures a word that ends in:
+        // - 'ed' (e.g., "was *started*")
+        // - 'en' (e.g., "is *broken*")
+        // - 'wn' (e.g., "has *shown*")
+        // - 't' (e.g., "were *burnt*")
+        // - 'ne' (e.g., "are *gone*")
+        // This is a common simplification for detecting past participles in JavaScript without a full grammar parser.
+
+        function findPassiveVoice() {
+            const textInput = document.getElementById('textInput');
+            const originalText = textInput.value;
+            const outputDiv = document.getElementById('highlightedOutput');
+            const stats = document.getElementById('stats');
+            
+            if (!originalText.trim()) {
+                outputDiv.textContent = 'Please paste some text to check.';
+                stats.textContent = '';
+                return;
+            }
+
+            let passiveCount = 0;
+
+            // Use the regex to find and replace matches with a highlighting span
+            const highlightedText = originalText.replace(passiveRegex, (match, beForm, participle) => {
+                passiveCount++;
+                // The match includes the "to be" form, space, and the participle
+                return `<span class="passive">${match}</span>`;
+            });
+            
+            // To ensure line breaks are preserved in the HTML output
+            outputDiv.innerHTML = highlightedText.replace(/\n/g, '<br>');
+
+            // Calculate statistics
+            const sentences = originalText.match(/[^.!?]+[.!?]+/g) || [];
+            const passivePercentage = sentences.length > 0 ? ((passiveCount / sentences.length) * 100).toFixed(1) : 0;
+            
+            stats.innerHTML = `Found **${passiveCount}** potential passive constructions. (${passivePercentage}% of sentences may contain passive voice.)`;
+        }
+        
+        // Clears the highlight output when text is edited
+        function clearHighlight() {
+            document.getElementById('highlightedOutput').textContent = 'Changes detected. Click "Check for Passive Voice" to update.';
+            document.getElementById('stats').textContent = '';
+        }
+
+        // Initialize with default text
+        document.addEventListener('DOMContentLoaded', () => {
+             document.getElementById('textInput').value = "The experiment was started by the researchers at noon. New safety rules were implemented by the board last week. The findings have been presented at the conference. The sun rose and the results are encouraging. This report is written in active voice, which is preferred by most editors.";
+             findPassiveVoice();
+        });
+    </script>
+
+</body>
+</html>

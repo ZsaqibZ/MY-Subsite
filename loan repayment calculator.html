@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loan Repayment Calculator | EngiSimulation Tools</title>
+    <style>
+        /* Basic Styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #0056b3;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 10px;
+        }
+        .input-group {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="number"] {
+            width: calc(100% - 10px);
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 1em;
+        }
+        button {
+            grid-column: 1 / -1;
+            background-color: #28a745;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #1e7e34;
+        }
+
+        /* Results & Comparison */
+        .results-section {
+            margin-top: 30px;
+            padding: 20px;
+            border: 2px solid #ffc107;
+            border-radius: 4px;
+            background-color: #fff9e6;
+        }
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 15px;
+            text-align: center;
+        }
+        .card {
+            border: 1px solid #0056b3;
+            padding: 15px;
+            border-radius: 6px;
+            background-color: #f0f8ff;
+        }
+        .card h4 {
+            margin-top: 0;
+            color: #0056b3;
+        }
+        .card .value {
+            font-size: 1.8em;
+            font-weight: bold;
+            display: block;
+            margin: 5px 0 10px;
+        }
+        .savings {
+            font-size: 1.1em;
+            color: #dc3545;
+            margin-top: 10px;
+        }
+        .savings.positive {
+            color: #28a745;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>💵 Loan Repayment Calculator</h2>
+        <p>Calculate your loan payments and see the dramatic impact of adding a fixed extra payment to your principal each month.</p>
+
+        <div class="input-group">
+            <div>
+                <label for="principal">Loan Principal ($):</label>
+                <input type="number" id="principal" value="100000" min="1000">
+            </div>
+            <div>
+                <label for="rate">Annual Interest Rate (%):</label>
+                <input type="number" id="rate" value="5" step="0.01" min="0.1">
+            </div>
+            <div>
+                <label for="term">Loan Term (Years):</label>
+                <input type="number" id="term" value="30" min="1">
+            </div>
+            <div style="grid-column: 1 / span 2;">
+                <label for="extraPayment">Monthly Extra Principal Payment ($):</label>
+                <input type="number" id="extraPayment" value="100" min="0" step="5">
+            </div>
+            <button onclick="calculateLoan()">Calculate Impact</button>
+        </div>
+
+        <div class="results-section">
+            <h3>Comparison Summary</h3>
+            <div class="comparison-grid">
+                <div class="card">
+                    <h4>Standard Repayment</h4>
+                    <span class="value" id="standardPayment">N/A</span>
+                    <small>Monthly Payment</small>
+                    <span class="value" id="standardTerm">N/A</span>
+                    <small>Total Term (Years & Months)</small>
+                    <span class="value" id="standardInterest">N/A</span>
+                    <small>Total Interest Paid</small>
+                </div>
+                
+                <div class="card">
+                    <h4>With Extra Payment</h4>
+                    <span class="value" id="extraPaymentTotal">N/A</span>
+                    <small>New Total Monthly Payment</small>
+                    <span class="value" id="extraTerm">N/A</span>
+                    <small>New Total Term (Years & Months)</small>
+                    <span class="value" id="extraInterest">N/A</span>
+                    <small>New Total Interest Paid</small>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <h4>Total Savings from Extra Payments:</h4>
+                <div class="savings positive" id="totalSavings">N/A</div>
+                <div class="savings positive" id="timeSaved">N/A</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Converts a decimal interest rate to a monthly rate
+        function getMonthlyRate(annualRate) {
+            return annualRate / 100 / 12;
+        }
+
+        // Calculates the standard monthly payment (M)
+        function calculateMonthlyPayment(P, r, n) {
+            // P = Principal, r = monthly rate, n = total number of payments
+            if (r === 0) return P / n;
+            return P * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+        }
+
+        // Calculates loan amortization with an optional extra payment
+        function calculateAmortization(principal, rate, termYears, extraPayment) {
+            let P = principal;
+            const r = getMonthlyRate(rate);
+            const n = termYears * 12;
+
+            if (principal <= 0 || rate < 0 || termYears <= 0) {
+                return { monthlyPayment: 0, totalInterest: 0, totalPayments: 0 };
+            }
+
+            // 1. Calculate Standard Monthly Payment
+            const standardPayment = calculateMonthlyPayment(P, r, n);
+            let payment = standardPayment + extraPayment;
+            
+            let totalInterest = 0;
+            let paymentsMade = 0;
+
+            // 2. Run Amortization Loop
+            while (P > 0) {
+                if (paymentsMade > 5000) break; // Safety break for excessively long loans
+
+                paymentsMade++;
+
+                // Calculate interest for the current month
+                const monthlyInterest = P * r;
+                totalInterest += monthlyInterest;
+                
+                // Determine amount applied to principal
+                let principalPayment = standardPayment - monthlyInterest;
+                
+                // Add the extra payment to the principal amount (if extraPayment > 0)
+                principalPayment += extraPayment;
+
+                // If the remaining principal is less than the required payment, the last payment is just the remaining principal + interest
+                if (principalPayment >= P) {
+                    totalInterest -= extraPayment; // Don't count extra payment toward interest total
+                    P = 0;
+                    break;
+                }
+
+                P -= principalPayment;
+            }
+
+            return {
+                monthlyPayment: standardPayment,
+                totalInterest: totalInterest,
+                totalPayments: paymentsMade,
+                totalExtraPayment: standardPayment + extraPayment
+            };
+        }
+
+        function calculateLoan() {
+            const principal = parseFloat(document.getElementById('principal').value);
+            const rate = parseFloat(document.getElementById('rate').value);
+            const termYears = parseFloat(document.getElementById('term').value);
+            const extraPayment = parseFloat(document.getElementById('extraPayment').value);
+
+            if (isNaN(principal) || isNaN(rate) || isNaN(termYears) || isNaN(extraPayment) || principal <= 0) {
+                alert("Please enter valid principal, rate, and term values.");
+                return;
+            }
+            
+            // --- Standard Calculation (Extra Payment = 0) ---
+            const standard = calculateAmortization(principal, rate, termYears, 0);
+
+            // --- Extra Payment Calculation ---
+            const withExtra = calculateAmortization(principal, rate, termYears, extraPayment);
+
+            // --- Display Formatting ---
+            const formatCurrency = (amount) => '$' + (amount).toFixed(2);
+            
+            function formatTerm(totalMonths) {
+                const years = Math.floor(totalMonths / 12);
+                const months = Math.round(totalMonths % 12);
+                return `${years} yrs, ${months} mos`;
+            }
+
+            // --- Display Standard Results ---
+            document.getElementById('standardPayment').textContent = formatCurrency(standard.monthlyPayment);
+            document.getElementById('standardTerm').textContent = formatTerm(standard.totalPayments);
+            document.getElementById('standardInterest').textContent = formatCurrency(standard.totalInterest);
+            
+            // --- Display Extra Payment Results ---
+            document.getElementById('extraPaymentTotal').textContent = formatCurrency(withExtra.totalExtraPayment);
+            document.getElementById('extraTerm').textContent = formatTerm(withExtra.totalPayments);
+            document.getElementById('extraInterest').textContent = formatCurrency(withExtra.totalInterest);
+
+            // --- Display Savings ---
+            const interestSaved = standard.totalInterest - withExtra.totalInterest;
+            document.getElementById('totalSavings').textContent = formatCurrency(interestSaved) + ' Interest Saved';
+
+            const timeSavedMonths = standard.totalPayments - withExtra.totalPayments;
+            const savedYears = Math.floor(timeSavedMonths / 12);
+            const savedMonths = Math.round(timeSavedMonths % 12);
+            document.getElementById('timeSaved').textContent = `${savedYears} years and ${savedMonths} months shaved off the term!`;
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', calculateLoan);
+    </script>
+
+</body>
+</html>

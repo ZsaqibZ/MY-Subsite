@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compound Interest Predictor | EngiSimulation Tools</title>
+    <style>
+        /* Basic Styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #0056b3;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 10px;
+        }
+        .input-group {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="number"], select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 1em;
+        }
+        button {
+            grid-column: 3 / -1; /* Place button under the third column */
+            background-color: #28a745;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #1e7e34;
+        }
+
+        /* Results & Visualization */
+        .results-section {
+            margin-top: 30px;
+            padding: 20px;
+            border: 2px solid #ffc107;
+            border-radius: 4px;
+            background-color: #fff9e6;
+        }
+        .summary-box {
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .summary-item {
+            padding: 10px;
+            border-right: 1px solid #ccc;
+            flex-grow: 1;
+        }
+        .summary-item:last-child {
+            border-right: none;
+        }
+        .summary-item .label {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+        .summary-item .value {
+            font-size: 1.6em;
+            font-weight: bold;
+            color: #0056b3;
+        }
+
+        /* Chart/Table styles (Placeholder - requires a charting library for a real chart) */
+        #chartPlaceholder {
+            height: 250px;
+            background-color: #f9f9f9;
+            border: 1px dashed #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>💰 Compound Interest Predictor</h2>
+        <p>Calculate your investment growth by predicting future balances based on your contributions and interest rate.</p>
+
+        <div class="input-group">
+            <div>
+                <label for="initialPrincipal">Initial Investment ($):</label>
+                <input type="number" id="initialPrincipal" value="1000" min="0">
+            </div>
+            <div>
+                <label for="annualRate">Annual Rate (%):</label>
+                <input type="number" id="annualRate" value="7" step="0.1" min="0.1">
+            </div>
+            <div>
+                <label for="years">Investment Term (Years):</label>
+                <input type="number" id="years" value="10" min="1" max="60">
+            </div>
+            
+            <div>
+                <label for="monthlyContribution">Monthly Contribution ($):</label>
+                <input type="number" id="monthlyContribution" value="100" min="0">
+            </div>
+            <div>
+                <label for="compoundingFrequency">Compounding Frequency:</label>
+                <select id="compoundingFrequency">
+                    <option value="12">Monthly</option>
+                    <option value="4">Quarterly</option>
+                    <option value="1">Annually</option>
+                </select>
+            </div>
+            <button onclick="calculateCompoundInterest()">Calculate Growth</button>
+        </div>
+
+        <div class="results-section">
+            <h3>Predicted Growth Summary (After <span id="summaryYears">10</span> Years)</h3>
+            <div class="summary-box">
+                <div class="summary-item">
+                    <span class="value" id="finalBalance">$0.00</span>
+                    <span class="label">Final Balance</span>
+                </div>
+                <div class="summary-item">
+                    <span class="value" id="totalPrincipal">$0.00</span>
+                    <span class="label">Total Contributed (Principal)</span>
+                </div>
+                <div class="summary-item">
+                    <span class="value" id="totalInterest">$0.00</span>
+                    <span class="label">Total Interest Earned</span>
+                </div>
+            </div>
+
+            <h4>Growth Visualization (Yearly Breakdown)</h4>
+            <div id="chartPlaceholder">
+                [A graph would typically go here, showing the balance (Total vs. Interest) over time.]
+            </div>
+            <p style="text-align: center; margin-top: 15px; font-size: 0.9em; color: #666;">
+                The balance visualization is simulated in the console output for simplicity.
+            </p>
+        </div>
+
+    </div>
+
+    <script>
+        function calculateCompoundInterest() {
+            // Input variables
+            const P0 = parseFloat(document.getElementById('initialPrincipal').value) || 0; // Initial Principal
+            const r = parseFloat(document.getElementById('annualRate').value) / 100 || 0; // Annual Rate (decimal)
+            const t = parseInt(document.getElementById('years').value) || 0; // Time in years
+            const PMT = parseFloat(document.getElementById('monthlyContribution').value) || 0; // Monthly Contribution
+            const n = parseInt(document.getElementById('compoundingFrequency').value) || 12; // Compounding frequency per year
+
+            if (t <= 0) return;
+
+            // Adjust contribution to match compounding frequency
+            let contributionFrequency = 12; // Assume monthly contribution
+            let PMT_annual = PMT * contributionFrequency;
+            
+            // Monthly contribution is converted to annual for the formula, then distributed by compounding periods
+            let PMT_adjusted = PMT_annual / n; 
+
+            // Calculate the periodic rate and total periods
+            const rate_per_period = r / n;
+            const total_periods = t * n;
+
+            let currentBalance = P0;
+            let totalContributions = P0; // Start with initial principal
+            
+            let yearlyBreakdown = [];
+
+            // Main loop to calculate growth period by period
+            for (let i = 1; i <= total_periods; i++) {
+                
+                // Add contribution for the period
+                currentBalance += PMT_adjusted;
+                
+                // Calculate interest for the period (I = P * r_per_period)
+                const interestEarned = currentBalance * rate_per_period;
+                currentBalance += interestEarned;
+                
+                // Track total contributions (exclude the initial P0 if it's the first period)
+                if (i > n) { // After the first year
+                     totalContributions += PMT_adjusted;
+                } else if (i <= n && i > 0 && contributionFrequency === n) {
+                     // Initial principal is counted above, so we only need to account for PMT_adjusted
+                     // Total contribution tracking simplified:
+                     if (i % (12 / contributionFrequency) === 0) {
+                         // Only count contributions based on 12/n periods
+                     }
+                }
+                
+                // Track yearly snapshot for visualization
+                if (i % n === 0) {
+                    const year = i / n;
+                    yearlyBreakdown.push({
+                        year: year,
+                        balance: currentBalance,
+                        contributed: totalContributions + (PMT * 12 * (year - 1))
+                    });
+                }
+            }
+
+            // Recalculate Total Contributions more simply:
+            const totalPMT = PMT * 12 * t;
+            const finalTotalContributed = P0 + totalPMT;
+            
+            const finalBalance = currentBalance;
+            const totalInterest = finalBalance - finalTotalContributed;
+
+            // --- Update UI ---
+            const formatCurrency = (amount) => '$' + Math.max(0, amount).toFixed(2);
+            
+            document.getElementById('summaryYears').textContent = t;
+            document.getElementById('finalBalance').textContent = formatCurrency(finalBalance);
+            document.getElementById('totalPrincipal').textContent = formatCurrency(finalTotalContributed);
+            document.getElementById('totalInterest').textContent = formatCurrency(totalInterest);
+
+            // --- Visualization (Console Output for detailed breakdown) ---
+            console.log("\n--- Compound Interest Yearly Breakdown ---");
+            console.log("Year | Final Balance | Total Contributed | Interest Earned");
+            
+            let lastContributed = P0;
+            let lastBalance = P0;
+            
+            for (let y = 1; y <= t; y++) {
+                // Calculate balance for year 'y'
+                // This iterative formula is simpler for display than the main loop.
+                const principalStart = (y === 1) ? P0 : lastBalance;
+                
+                // Calculate balance using the standard future value formula for an annuity + initial sum
+                // FV = P0(1 + r/n)^(nt) + PMT * [((1 + r/n)^(nt) - 1) / (r/n)]
+                
+                // Future Value of a Lump Sum
+                const FV_lump = P0 * Math.pow((1 + rate_per_period), (y * n));
+
+                // Future Value of an Annuity (regular contributions)
+                // Need to adjust PMT for annual total
+                const FV_annuity = (PMT_annual / n) * ((Math.pow((1 + rate_per_period), (y * n)) - 1) / rate_per_period);
+                
+                const finalYearBalance = FV_lump + FV_annuity;
+                
+                const currentContributed = P0 + (PMT * 12 * y);
+                const currentInterest = finalYearBalance - currentContributed;
+
+                console.log(
+                    `${String(y).padEnd(4)} | ${formatCurrency(finalYearBalance).padEnd(14)} | ${formatCurrency(currentContributed).padEnd(17)} | ${formatCurrency(currentInterest)}`
+                );
+                
+                lastBalance = finalYearBalance;
+                lastContributed = currentContributed;
+            }
+            console.log("----------------------------------------\n");
+            document.getElementById('chartPlaceholder').innerHTML = "Results printed to the console for yearly breakdown.";
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', calculateCompoundInterest);
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentence Variety Analyzer | EngiSimulation Tools</title>
+    <style>
+        /* Basic Styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #0056b3;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 10px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        textarea {
+            width: 100%;
+            min-height: 250px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 1.1em;
+            resize: vertical;
+            margin-bottom: 15px;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #1e7e34;
+        }
+        .results-section {
+            margin-top: 30px;
+            padding: 20px;
+            border: 2px solid #ffc107;
+            border-radius: 4px;
+            background-color: #fff9e6;
+        }
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .stats-table th, .stats-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        .stats-table th {
+            background-color: #0056b3;
+            color: white;
+        }
+        .warning {
+            color: #dc3545;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>📊 Sentence Variety Analyzer</h2>
+        <p>Analyze your text for sentence length variance and repeated starting words to improve flow and rhythm.</p>
+
+        <label for="textInput">Your Text:</label>
+        <textarea id="textInput" placeholder="Paste your writing here..."></textarea>
+        
+        <button onclick="analyzeVariety()">Analyze Variety</button>
+
+        <div class="results-section">
+            <h3>Analysis Results:</h3>
+            <div id="statsOutput">
+                Paste text and click 'Analyze Variety'.
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Utility function to calculate word count
+        function getWordCount(text) {
+            text = text.trim();
+            if (text === "") return 0;
+            // Split by any whitespace and filter out empty strings
+            return text.split(/\s+/).filter(word => word.length > 0).length;
+        }
+
+        // Utility function to calculate standard deviation
+        function getStandardDeviation(array, mean) {
+            const squareDiffs = array.map(value => Math.pow(value - mean, 2));
+            const avgSquareDiff = squareDiffs.reduce((sum, value) => sum + value, 0) / array.length;
+            return Math.sqrt(avgSquareDiff);
+        }
+
+        function analyzeVariety() {
+            const fullText = document.getElementById('textInput').value;
+            const outputDiv = document.getElementById('statsOutput');
+            
+            if (getWordCount(fullText) < 20) {
+                outputDiv.innerHTML = '<p class="warning">Please enter at least 20 words for meaningful analysis.</p>';
+                return;
+            }
+
+            // 1. Sentence Segmentation
+            // Split by common end punctuation, including the punctuation itself in the match.
+            const sentences = fullText.match(/[^.!?]+[.!?]+/g) || [];
+
+            if (sentences.length < 3) {
+                 outputDiv.innerHTML = '<p class="warning">Please ensure your text contains at least 3 distinct sentences.</p>';
+                 return;
+            }
+
+            // 2. Length Analysis
+            const sentenceLengths = sentences.map(s => getWordCount(s));
+            const totalLength = sentenceLengths.reduce((sum, len) => sum + len, 0);
+            const meanLength = (totalLength / sentenceLengths.length).toFixed(1);
+            
+            const minLength = Math.min(...sentenceLengths);
+            const maxLength = Math.max(...sentenceLengths);
+            const range = maxLength - minLength;
+            const stdDev = getStandardDeviation(sentenceLengths, parseFloat(meanLength)).toFixed(1);
+
+            // 3. Starting Word Analysis
+            const startWordCounts = {};
+            const startWords = [];
+
+            sentences.forEach(s => {
+                const cleanedSentence = s.trim().replace(/^['"\s]*/, ''); // Remove leading quotes/spaces
+                const firstWordMatch = cleanedSentence.match(/^\b(\w+)/);
+                
+                if (firstWordMatch) {
+                    const startWord = firstWordMatch[1].toLowerCase();
+                    startWords.push(startWord);
+                    startWordCounts[startWord] = (startWordCounts[startWord] || 0) + 1;
+                }
+            });
+
+            // Identify repeated starters (more than 1 occurrence)
+            const repeatedStarters = Object.entries(startWordCounts)
+                .filter(([word, count]) => count > 1)
+                .sort((a, b) => b[1] - a[1]); // Sort by frequency
+
+            // 4. Generate HTML Output
+
+            let html = `
+                <h4>Sentence Length Statistics</h4>
+                <table class="stats-table">
+                    <tr>
+                        <th>Metric</th>
+                        <th>Words</th>
+                        <th>Flow Interpretation</th>
+                    </tr>
+                    <tr>
+                        <td>Total Sentences</td>
+                        <td>${sentences.length}</td>
+                        <td>Total units analyzed.</td>
+                    </tr>
+                    <tr>
+                        <td>**Average Length**</td>
+                        <td>**${meanLength}**</td>
+                        <td>Aim for a mix; 15-20 is typical.</td>
+                    </tr>
+                    <tr>
+                        <td>Range (Max - Min)</td>
+                        <td>${range}</td>
+                        <td>A higher range indicates better variety.</td>
+                    </tr>
+                    <tr>
+                        <td>Std. Deviation</td>
+                        <td>${stdDev}</td>
+                        <td>Higher STDDEV (e.g., >5) suggests good structural variance.</td>
+                    </tr>
+                </table>
+            `;
+
+            html += `
+                <h4>Starting Word Variety Check</h4>
+                <p>Total unique starting words: <strong>${Object.keys(startWordCounts).length}</strong> out of ${sentences.length} sentences.</p>
+            `;
+
+            if (repeatedStarters.length > 0) {
+                html += '<p class="warning">⚠️ Potential flow issue detected: The following words start multiple sentences:</p>';
+                html += '<ul style="list-style-type: none; padding-left: 0;">';
+                repeatedStarters.forEach(([word, count]) => {
+                    html += `<li>- <strong>"${word}"</strong>: Used ${count} times (${((count/sentences.length)*100).toFixed(0)}% of the time).</li>`;
+                });
+                html += '</ul>';
+                html += '<p style="font-size: 0.9em; color:#dc3545;">*Consider using transitional phrases or restructuring sentences starting with these words.*</p>';
+            } else {
+                html += '<p style="color: green;">✅ Excellent starting word variety detected!</p>';
+            }
+
+            outputDiv.innerHTML = html;
+        }
+
+        // Initialize with default text
+        document.addEventListener('DOMContentLoaded', () => {
+             document.getElementById('textInput').value = "The engineers tested the device thoroughly. They ran three simulations over the weekend. They discovered a minor flaw in the wiring. They corrected the flaw easily. The final result proved promising and stable. The company will now move to production. It is a good day for the team.";
+             analyzeVariety();
+        });
+    </script>
+
+</body>
+</html>

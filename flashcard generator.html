@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flashcard Generator | EngiSimulation Tools</title>
+    <style>
+        /* Basic Styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #0056b3;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 10px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 4px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            min-height: 150px;
+            resize: vertical;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #1e7e34;
+        }
+        .flashcard-output {
+            margin-top: 30px;
+            padding: 20px;
+            border: 2px solid #007bff;
+            border-radius: 4px;
+            background-color: #e6f7ff;
+        }
+        .flashcards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Two columns for cards */
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .flashcard {
+            border: 1px solid #999;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: relative;
+            padding: 10px;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            font-size: 1.1em;
+            overflow: hidden; /* For folding line */
+        }
+        .flashcard-term {
+            font-weight: bold;
+            color: #0056b3;
+            margin-bottom: 5px;
+        }
+        .flashcard-definition {
+            font-size: 0.9em;
+            color: #555;
+            padding-top: 5px;
+            border-top: 1px dashed #ccc; /* Visual separation for folding */
+            margin-top: 5px;
+        }
+        .flashcard-note {
+            font-size: 0.8em;
+            color: #777;
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        /* Print Specific Styles */
+        @media print {
+            body {
+                background-color: #fff;
+                margin: 0;
+            }
+            .container, .input-group, button {
+                display: none; /* Hide input and controls when printing */
+            }
+            .flashcard-output {
+                margin: 0;
+                padding: 0;
+                border: none;
+                background-color: #fff;
+                box-shadow: none;
+            }
+            .flashcards-grid {
+                grid-template-columns: 1fr 1fr; /* Force two columns on print */
+                gap: 0; /* No gap for continuous cards */
+                page-break-after: always; /* Each grid group might be a new page */
+            }
+            .flashcard {
+                border: 1px solid #888;
+                page-break-inside: avoid; /* Prevent cards from breaking across pages */
+                margin: 5mm; /* Small margin around each card for cutting */
+                box-shadow: none;
+                height: 100mm; /* Fixed height for consistent card size */
+                width: 130mm; /* Fixed width */
+                min-height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>📇 Flashcard Generator</h2>
+        <p>Enter your terms and definitions, one per line, in the format: <code>Term: Definition</code>.</p>
+        <p>Example: <code>Photosynthesis: The process by which green plants and some other organisms use sunlight to synthesize foods.</code></p>
+
+        <div class="input-group">
+            <label for="flashcardsData">Terms and Definitions:</label>
+            <textarea id="flashcardsData" placeholder="Enter Term: Definition pairs here..."
+            >Mitosis: Cell division that results in two daughter cells each having the same number and kind of chromosomes as the parent nucleus.
+Meiosis: A type of cell division that reduces the number of chromosomes in the parent cell by half and produces four gamete cells.
+Algae: A diverse group of photosynthetic eukaryotic organisms.
+Fungus: Any member of the group of eukaryotic organisms that includes microorganisms such as yeasts and molds, as well as the more familiar mushrooms.
+Photosynthesis: The process by which green plants and some other organisms use sunlight to synthesize foods.
+</textarea>
+            <button onclick="generateFlashcards()">Generate Flashcards</button>
+        </div>
+
+        <div class="flashcard-output">
+            <h3>Your Generated Flashcards:</h3>
+            <p class="flashcard-note">Cut along the outer lines, then fold along the dashed line to create two-sided flashcards.</p>
+            <div id="flashcardsGrid" class="flashcards-grid">
+                No flashcards generated yet. Enter data and click 'Generate'.
+            </div>
+            <p style="text-align: center; margin-top: 20px;">
+                <button onclick="window.print()">🖨️ Print Flashcards</button>
+            </p>
+        </div>
+
+    </div>
+
+    <script>
+        function generateFlashcards() {
+            const flashcardsData = document.getElementById('flashcardsData').value.trim();
+            const flashcardsGrid = document.getElementById('flashcardsGrid');
+            flashcardsGrid.innerHTML = ''; // Clear previous flashcards
+
+            if (!flashcardsData) {
+                flashcardsGrid.innerHTML = '<p>No data entered to generate flashcards.</p>';
+                return;
+            }
+
+            const lines = flashcardsData.split('\n').filter(line => line.trim() !== '');
+
+            if (lines.length === 0) {
+                flashcardsGrid.innerHTML = '<p>No valid Term: Definition pairs found.</p>';
+                return;
+            }
+
+            lines.forEach(line => {
+                const parts = line.split(':');
+                if (parts.length >= 2) {
+                    const term = parts[0].trim();
+                    // Join the rest of the parts for the definition in case it contains colons
+                    const definition = parts.slice(1).join(':').trim();
+
+                    if (term && definition) {
+                        const flashcardDiv = document.createElement('div');
+                        flashcardDiv.classList.add('flashcard');
+                        
+                        // Term side
+                        const termDiv = document.createElement('div');
+                        termDiv.classList.add('flashcard-term');
+                        termDiv.textContent = term;
+                        flashcardDiv.appendChild(termDiv);
+
+                        // Definition side (with dashed line above)
+                        const definitionDiv = document.createElement('div');
+                        definitionDiv.classList.add('flashcard-definition');
+                        definitionDiv.textContent = definition;
+                        flashcardDiv.appendChild(definitionDiv);
+
+                        flashcardsGrid.appendChild(flashcardDiv);
+                    }
+                }
+            });
+
+            if (flashcardsGrid.innerHTML === '') {
+                flashcardsGrid.innerHTML = '<p>Could not parse any valid "Term: Definition" pairs. Please check your format.</p>';
+            }
+        }
+
+        // Generate flashcards on page load with default data
+        document.addEventListener('DOMContentLoaded', generateFlashcards);
+    </script>
+
+</body>
+</html>

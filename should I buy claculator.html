@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>"Should I Buy?" Calculator | EngiSimulation Tools</title>
+    <style>
+        /* Basic Styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .container {
+            max-width: 850px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #0056b3;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 10px;
+        }
+        .input-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 20px;
+        }
+        .section-box {
+            padding: 15px;
+            border-radius: 4px;
+        }
+        #buyInputs { border: 1px solid #dc3545; background-color: #fcebeb; }
+        #rentInputs { border: 1px solid #007bff; background-color: #e6f7ff; }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 0.95em;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 1em;
+        }
+        button {
+            width: 100%;
+            background-color: #28a745;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #1e7e34;
+        }
+
+        /* Results */
+        .results-section {
+            margin-top: 30px;
+            padding: 20px;
+            border: 2px solid #ffc107;
+            border-radius: 4px;
+            background-color: #fff9e6;
+            text-align: center;
+        }
+        #recommendation {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .buy-result { color: #dc3545; }
+        .rent-result { color: #007bff; }
+        
+        .cost-comparison {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
+        .cost-comparison strong {
+            display: block;
+            margin-top: 5px;
+            font-size: 1.5em;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>⚖️ "Should I Buy?" Calculator (Rent vs. Buy)</h2>
+        <p>Compare the total financial cost of renting an item versus buying and keeping it for a set analysis period.</p>
+
+        <div>
+            <label for="analysisPeriod">Analysis Period (Months you need the item):</label>
+            <input type="number" id="analysisPeriod" value="36" min="1" max="120" placeholder="e.g., 36 months for 3 years">
+        </div>
+
+        <div class="input-grid">
+            
+            <div id="buyInputs" class="section-box">
+                <h3>💰 Cost to Buy</h3>
+                <label for="purchasePrice">Initial Purchase Price ($):</label>
+                <input type="number" id="purchasePrice" value="5000" min="0">
+                
+                <label for="maintenanceCost">Total Monthly Maintenance/Operating Cost ($):</label>
+                <input type="number" id="maintenanceCost" value="50" min="0">
+                
+                <label for="resaleValue">Estimated Resale/Salvage Value after Analysis Period ($):</label>
+                <input type="number" id="resaleValue" value="1000" min="0">
+            </div>
+
+            <div id="rentInputs" class="section-box">
+                <h3>💸 Cost to Rent</h3>
+                <label for="monthlyRentalFee">Monthly Rental Fee ($):</label>
+                <input type="number" id="monthlyRentalFee" value="300" min="0">
+                
+                <label for="rentMaintenanceFee">Total Monthly Maintenance/Service Fee (Paid to Rental Co.) ($):</label>
+                <input type="number" id="rentMaintenanceFee" value="10" min="0">
+                
+                <p style="margin-top: 55px; font-size: 0.9em; color: #666;">
+                    *Rental cost typically has no resale/salvage value.
+                </p>
+            </div>
+        </div>
+        
+        <button onclick="calculateComparison()">Determine Best Option</button>
+
+        <div class="results-section">
+            <h3>Best Financial Option:</h3>
+            <div id="recommendation">
+                Enter all values and click 'Determine Best Option'.
+            </div>
+            
+            <div class="cost-comparison">
+                <div>
+                    Total Buy Cost: <strong class="buy-result" id="totalBuyCost">$0.00</strong>
+                </div>
+                <div>
+                    Total Rent Cost: <strong class="rent-result" id="totalRentCost">$0.00</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function calculateComparison() {
+            // Get Common Input
+            const T = parseInt(document.getElementById('analysisPeriod').value) || 0; // Total Months
+
+            // Get Buy Inputs
+            const P = parseFloat(document.getElementById('purchasePrice').value) || 0; // Purchase Price
+            const M = parseFloat(document.getElementById('maintenanceCost').value) || 0; // Monthly Maintenance (Buy)
+            const R = parseFloat(document.getElementById('resaleValue').value) || 0; // Resale Value
+
+            // Get Rent Inputs
+            const F = parseFloat(document.getElementById('monthlyRentalFee').value) || 0; // Monthly Rental Fee
+            const S = parseFloat(document.getElementById('rentMaintenanceFee').value) || 0; // Monthly Service Fee (Rent)
+
+            const outputRec = document.getElementById('recommendation');
+            const outputBuy = document.getElementById('totalBuyCost');
+            const outputRent = document.getElementById('totalRentCost');
+
+            if (T <= 0) {
+                outputRec.textContent = 'Please enter a valid Analysis Period (Months).';
+                outputBuy.textContent = '$0.00';
+                outputRent.textContent = '$0.00';
+                return;
+            }
+
+            // --- 1. Calculate Total Cost to Buy ---
+            // Total Buy Cost = Initial Price + (Monthly Maintenance * Total Months) - Resale Value
+            const totalMaintenance = M * T;
+            const totalBuy = P + totalMaintenance - R;
+
+            // --- 2. Calculate Total Cost to Rent ---
+            // Total Rent Cost = (Monthly Rental Fee + Monthly Service Fee) * Total Months
+            const totalRent = (F + S) * T;
+            
+            // --- 3. Determine Recommendation ---
+            let recommendationText = '';
+            let recommendationClass = '';
+
+            if (totalBuy < totalRent) {
+                recommendationText = 'Financial Decision: BUY!';
+                recommendationClass = 'buy-result';
+            } else if (totalRent < totalBuy) {
+                recommendationText = 'Financial Decision: RENT!';
+                recommendationClass = 'rent-result';
+            } else {
+                recommendationText = 'Costs are approximately equal. Choose based on flexibility.';
+                recommendationClass = '';
+            }
+
+            // --- 4. Update UI ---
+            const formatCurrency = (amount) => '$' + Math.max(0, amount).toFixed(2);
+            
+            outputBuy.textContent = formatCurrency(totalBuy);
+            outputRent.textContent = formatCurrency(totalRent);
+            
+            outputRec.textContent = recommendationText;
+            outputRec.className = recommendationClass;
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', calculateComparison);
+    </script>
+
+</body>
+</html>

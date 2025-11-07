@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Code Snippet Manager — Advanced</title>
+<style>
+  :root{ --bg:#071021; --card:#0b1220; --muted:#9aa4b2; --accent:#06b6d4; --accent-2:#7c3aed; --glass:rgba(255,255,255,0.02); --text:#e6eef8; font-family:Inter,ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,Arial }
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;background:linear-gradient(180deg,var(--bg),#021019);color:var(--text);padding:28px}
+  .app{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 360px;gap:18px}
+  header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between}
+  h1{margin:0;font-size:20px}
+  .card{background:linear-gradient(180deg,var(--card),#021118);border-radius:12px;padding:14px;border:1px solid rgba(255,255,255,0.03)}
+  .controls{display:flex;gap:8px;align-items:center}
+  input[type=text], textarea{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
+  textarea{min-height:140px;font-family:monospace;resize:vertical}
+  .btn{background:linear-gradient(180deg,var(--accent-2),#5b21b6);padding:8px 12px;border-radius:8px;border:none;color:white;cursor:pointer}
+  .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04)}
+  .list{margin-top:12px;max-height:520px;overflow:auto}
+  .snippet-card{border-radius:10px;padding:10px;margin-bottom:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03)}
+  .meta{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .tag{display:inline-block;padding:4px 8px;border-radius:6px;background:rgba(255,255,255,0.03);font-size:12px}
+  .search{display:flex;gap:8px;margin-top:10px}
+  .small{font-size:13px;color:var(--muted)}
+  pre{background:#061523;padding:10px;border-radius:8px;overflow:auto;font-family:monospace;white-space:pre-wrap}
+  .actions{display:flex;gap:8px}
+  @media(max-width:980px){.app{grid-template-columns:1fr;padding:10px}}
+</style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div>
+        <h1>Code Snippet Manager</h1>
+        <div class="small">Add, search, edit, tag, and copy snippets — stored locally</div>
+      </div>
+      <div class="small">LocalStorage • Lightweight highlighter</div>
+    </header>
+
+    <main class="card">
+      <div style="display:flex;gap:10px;align-items:center">
+        <input id="searchInput" type="text" placeholder="Search by title, tag or content" />
+        <button class="btn" id="searchBtn">Search</button>
+        <button class="btn ghost" id="clearSearch">Clear</button>
+      </div>
+
+      <div class="list" id="list"></div>
+
+      <div style="margin-top:12px;display:flex;gap:8px;align-items:center;justify-content:space-between">
+        <div class="small">Snippets saved locally (browser)</div>
+        <div class="small"><button class="btn ghost" id="exportBtn">Export JSON</button> <button class="btn ghost" id="importBtn">Import</button></div>
+      </div>
+    </main>
+
+    <aside class="card">
+      <label class="small">New / Edit Snippet</label>
+      <input id="title" type="text" placeholder="Title" />
+      <input id="tags" type="text" placeholder="Tags (comma separated)" style="margin-top:8px" />
+      <label class="small" style="margin-top:8px">Code</label>
+      <textarea id="code"></textarea>
+      <div style="margin-top:8px;display:flex;gap:8px">
+        <button class="btn" id="saveBtn">Save Snippet</button>
+        <button class="btn ghost" id="previewBtn">Preview</button>
+        <button class="btn ghost" id="newBtn">New</button>
+      </div>
+
+      <div style="margin-top:12px">
+        <label class="small">Preview</label>
+        <pre id="previewArea">(empty)</pre>
+      </div>
+    </aside>
+  </div>
+
+<script>
+// Simple Snippet Manager
+const STORAGE_KEY = 'code_snippets_v1';
+let snippets = JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');
+let editingId = null;
+
+const listEl = document.getElementById('list');
+const titleEl = document.getElementById('title');
+const tagsEl = document.getElementById('tags');
+const codeEl = document.getElementById('code');
+const previewArea = document.getElementById('previewArea');
+const saveBtn = document.getElementById('saveBtn');
+const previewBtn = document.getElementById('previewBtn');
+const newBtn = document.getElementById('newBtn');
+const searchInput = document.getElementById('searchInput');
+const searchBtn = document.getElementById('searchBtn');
+const clearSearch = document.getElementById('clearSearch');
+const exportBtn = document.getElementById('exportBtn');
+const importBtn = document.getElementById('importBtn');
+
+function saveToStorage(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(snippets)); }
+
+function renderList(filter=''){ listEl.innerHTML=''; const q = (filter||'').toLowerCase(); const filtered = snippets.filter(s=>{ return !q || (s.title+s.tags+s.code).toLowerCase().includes(q)}).sort((a,b)=>b.updated - a.updated);
+  if(filtered.length===0){ listEl.innerHTML = '<div class="small" style="padding:12px">No snippets yet.</div>'; return }
+  for(const s of filtered){ const el = document.createElement('div'); el.className='snippet-card'; el.innerHTML = `
+    <div class="meta"><div><strong>${escapeHtml(s.title)}</strong><div class="small">${new Date(s.updated).toLocaleString()}</div></div>
+    <div class="actions"><span class="tag">${s.tags.split(',').map(t=>t.trim()).filter(Boolean).slice(0,3).map(t=>escapeHtml(t)).join('</span> <span class="tag">')||'<i class="small">no tags</i>'}</span>
+    <button data-id="${s.id}" class="btn ghost copyBtn">Copy</button>
+    <button data-id="${s.id}" class="btn" style="padding:6px 8px" onclick="editSnippet('${s.id}')">Edit</button>
+    <button data-id="${s.id}" class="btn ghost" style="padding:6px 8px" onclick="deleteSnippet('${s.id}')">Delete</button>
+    </div></div>
+    <div style="margin-top:8px"><pre>${escapeHtml(s.code)}</pre></div>
+  `; listEl.appendChild(el);
+  }
+  // bind copy buttons
+  document.querySelectorAll('.copyBtn').forEach(b=> b.addEventListener('click', (ev)=>{ const id = ev.currentTarget.dataset.id; const sn = snippets.find(x=>x.id===id); navigator.clipboard.writeText(sn.code).then(()=>{ b.textContent='Copied ✓'; setTimeout(()=> b.textContent='Copy',900) }) }))
+}
+
+function escapeHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function newSnippet(){ editingId = null; titleEl.value=''; tagsEl.value=''; codeEl.value=''; previewArea.textContent='(empty)'; }
+
+function saveSnippet(){ const title = titleEl.value.trim()||'Untitled'; const tags = tagsEl.value.trim(); const code = codeEl.value; if(!code){ alert('Add code before saving'); return }
+  if(editingId){ const idx = snippets.findIndex(s=>s.id===editingId); if(idx>=0){ snippets[idx].title = title; snippets[idx].tags = tags; snippets[idx].code = code; snippets[idx].updated = Date.now(); } }
+  else{ snippets.push({ id: 's_'+Math.random().toString(36).slice(2,9), title, tags, code, created: Date.now(), updated: Date.now() }); }
+  saveToStorage(); renderList(searchInput.value); newSnippet(); }
+
+function editSnippet(id){ const s = snippets.find(x=>x.id===id); if(!s) return; editingId = id; titleEl.value = s.title; tagsEl.value = s.tags; codeEl.value = s.code; previewArea.textContent = s.code; window.scrollTo({top:0,behavior:'smooth'}); }
+
+function deleteSnippet(id){ if(!confirm('Delete snippet?')) return; snippets = snippets.filter(s=>s.id!==id); saveToStorage(); renderList(searchInput.value); }
+
+function previewCode(){ previewArea.textContent = codeEl.value || '(empty)'; // simple highlighter
+  applySimpleHighlight(previewArea);
+}
+
+function applySimpleHighlight(el){ // very lightweight regex-based highlighting for common tokens
+  const t = el.textContent;
+  // escape first
+  let out = escapeHtml(t);
+  // keywords (js-like)
+  out = out.replace(/\b(const|let|var|function|return|if|else|for|while|switch|case|break|class|new|throw|try|catch|await|async)\b/g,'<span style="color:#7ccccc">$1</span>');
+  // strings
+  out = out.replace(/(".*?"|'.*?'|`.*?`)/g,'<span style="color:#f59e0b">$1</span>');
+  // numbers
+  out = out.replace(/\b(\d+)\b/g,'<span style="color:#ef4444">$1</span>');
+  el.innerHTML = out;
+}
+
+// search handlers
+searchBtn.addEventListener('click', ()=> renderList(searchInput.value));
+clearSearch.addEventListener('click', ()=>{ searchInput.value=''; renderList(); });
+
+saveBtn.addEventListener('click', saveSnippet);
+previewBtn.addEventListener('click', previewCode);
+newBtn.addEventListener('click', newSnippet);
+
+exportBtn.addEventListener('click', ()=>{ const blob = new Blob([JSON.stringify(snippets, null, 2)], {type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='snippets.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(a.href); });
+
+importBtn.addEventListener('click', ()=>{
+  const inp = document.createElement('input'); inp.type='file'; inp.accept='.json,application/json'; inp.onchange = e=>{
+    const f = e.target.files[0]; if(!f) return; const r = new FileReader(); r.onload = ()=>{ try{ const data = JSON.parse(r.result); if(Array.isArray(data)) { snippets = snippets.concat(data.map(d=>({ ...d, id: d.id || ('s_'+Math.random().toString(36).slice(2,9)), created: d.created||Date.now(), updated: Date.now() }))); saveToStorage(); renderList(); alert('Imported '+data.length+' snippets'); } else alert('Invalid JSON structure'); }catch(err){ alert('Import error: '+err.message) } }; r.readAsText(f);
+  }; inp.click();
+});
+
+// initial render
+renderList();
+
+</script>
+</body>
+</html>

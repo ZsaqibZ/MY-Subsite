@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Prioritizer (Eisenhower Matrix) | EngiSimulation Tools</title>
+    <style>
+        /* Basic Styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .container {
+            max-width: 950px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #0056b3;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 10px;
+        }
+
+        /* Task Input */
+        #taskInputGroup {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        #newTaskName {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+        #addTaskBtn {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #addTaskBtn:hover {
+            background-color: #1e7e34;
+        }
+
+        /* Task List */
+        #taskList {
+            list-style: none;
+            padding: 0;
+        }
+        .task-item {
+            display: grid;
+            grid-template-columns: 1fr 100px 100px 50px;
+            gap: 10px;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px dashed #eee;
+        }
+        .task-item:last-child {
+            border-bottom: none;
+        }
+        .task-item label {
+            font-weight: normal;
+        }
+        .task-item button {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .task-item button:hover {
+            background-color: #c82333;
+        }
+
+        /* Matrix Output */
+        .matrix-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 10px;
+            height: 500px;
+            margin-top: 30px;
+        }
+        .matrix-quadrant {
+            padding: 15px;
+            border-radius: 6px;
+            overflow-y: auto;
+        }
+        .matrix-quadrant h4 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            text-align: center;
+            font-size: 1.2em;
+        }
+        
+        /* Quadrant Styling */
+        #quadrantDo { background-color: #dc354530; border: 2px solid #dc3545; }
+        #quadrantDo h4 { color: #dc3545; }
+        
+        #quadrantDecide { background-color: #ffc10730; border: 2px solid #ffc107; }
+        #quadrantDecide h4 { color: #ffc107; }
+        
+        #quadrantDelegate { background-color: #007bff30; border: 2px solid #007bff; }
+        #quadrantDelegate h4 { color: #007bff; }
+        
+        #quadrantDelete { background-color: #6c757d30; border: 2px solid #6c757d; }
+        #quadrantDelete h4 { color: #6c757d; }
+        
+        /* Tasks in Matrix */
+        .matrix-task {
+            background-color: #fff;
+            padding: 8px;
+            margin-bottom: 5px;
+            border-radius: 3px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            font-size: 0.9em;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>✅ Task Prioritizer (Eisenhower Matrix)</h2>
+        <p>Enter tasks below, then prioritize them based on **Urgency** and **Importance**. The matrix will show the suggested action.</p>
+
+        <div id="taskInputGroup">
+            <input type="text" id="newTaskName" placeholder="Enter a new task...">
+            <button id="addTaskBtn" onclick="addTask()">Add Task</button>
+        </div>
+
+        <ul id="taskList">
+            </ul>
+
+        <div class="matrix-grid">
+            <div id="quadrantDo" class="matrix-quadrant" style="grid-row: 1; grid-column: 1;">
+                <h4>Urgent & Important (DO)</h4>
+            </div>
+            <div id="quadrantDecide" class="matrix-quadrant" style="grid-row: 1; grid-column: 2;">
+                <h4>Not Urgent & Important (DECIDE / Schedule)</h4>
+            </div>
+            <div id="quadrantDelegate" class="matrix-quadrant" style="grid-row: 2; grid-column: 1;">
+                <h4>Urgent & Not Important (DELEGATE)</h4>
+            </div>
+            <div id="quadrantDelete" class="matrix-quadrant" style="grid-row: 2; grid-column: 2;">
+                <h4>Not Urgent & Not Important (DELETE / Drop)</h4>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let taskId = 0;
+
+        function addTask() {
+            const taskNameInput = document.getElementById('newTaskName');
+            const taskName = taskNameInput.value.trim();
+
+            if (taskName === "") {
+                alert("Please enter a task name.");
+                return;
+            }
+
+            const list = document.getElementById('taskList');
+            const id = ++taskId;
+            
+            const listItem = document.createElement('li');
+            listItem.className = 'task-item';
+            listItem.dataset.id = id;
+
+            listItem.innerHTML = `
+                <label>${taskName}</label>
+                <div>
+                    <input type="checkbox" id="urgent-${id}" onchange="updateMatrix()">
+                    <label for="urgent-${id}">Urgent</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="important-${id}" onchange="updateMatrix()">
+                    <label for="important-${id}">Important</label>
+                </div>
+                <button onclick="deleteTask(${id})">X</button>
+            `;
+
+            list.appendChild(listItem);
+            taskNameInput.value = ''; // Clear input
+            updateMatrix(); // Update matrix immediately
+        }
+
+        function deleteTask(id) {
+            const item = document.querySelector(`.task-item[data-id="${id}"]`);
+            if (item) {
+                item.remove();
+                updateMatrix();
+            }
+        }
+
+        function getTaskPriority(id) {
+            const isUrgent = document.getElementById(`urgent-${id}`).checked;
+            const isImportant = document.getElementById(`important-${id}`).checked;
+
+            if (isUrgent && isImportant) {
+                return 'Do';
+            } else if (!isUrgent && isImportant) {
+                return 'Decide';
+            } else if (isUrgent && !isImportant) {
+                return 'Delegate';
+            } else {
+                return 'Delete';
+            }
+        }
+
+        function updateMatrix() {
+            // Clear all quadrants
+            document.getElementById('quadrantDo').innerHTML = '<h4>Urgent & Important (DO)</h4>';
+            document.getElementById('quadrantDecide').innerHTML = '<h4>Not Urgent & Important (DECIDE / Schedule)</h4>';
+            document.getElementById('quadrantDelegate').innerHTML = '<h4>Urgent & Not Important (DELEGATE)</h4>';
+            document.getElementById('quadrantDelete').innerHTML = '<h4>Not Urgent & Not Important (DELETE / Drop)</h4>';
+
+            const tasks = document.querySelectorAll('.task-item');
+
+            tasks.forEach(taskItem => {
+                const id = taskItem.dataset.id;
+                const taskName = taskItem.querySelector('label').textContent;
+                const priority = getTaskPriority(id);
+
+                const taskDiv = document.createElement('div');
+                taskDiv.className = 'matrix-task';
+                taskDiv.textContent = taskName;
+
+                let targetQuadrant;
+                switch (priority) {
+                    case 'Do':
+                        targetQuadrant = document.getElementById('quadrantDo');
+                        break;
+                    case 'Decide':
+                        targetQuadrant = document.getElementById('quadrantDecide');
+                        break;
+                    case 'Delegate':
+                        targetQuadrant = document.getElementById('quadrantDelegate');
+                        break;
+                    case 'Delete':
+                        targetQuadrant = document.getElementById('quadrantDelete');
+                        break;
+                }
+                
+                targetQuadrant.appendChild(taskDiv);
+            });
+        }
+        
+        // Add a few placeholder tasks on load
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('newTaskName').value = 'Fix server crash';
+            addTask();
+            document.getElementById(`urgent-1`).checked = true;
+            document.getElementById(`important-1`).checked = true;
+
+            document.getElementById('newTaskName').value = 'Plan next quarter\'s budget';
+            addTask();
+            document.getElementById(`important-2`).checked = true;
+
+            document.getElementById('newTaskName').value = 'Respond to non-critical mass email';
+            addTask();
+            document.getElementById(`urgent-3`).checked = true;
+
+            document.getElementById('newTaskName').value = 'Organize old digital photo albums';
+            addTask();
+            
+            document.getElementById('newTaskName').value = '';
+            updateMatrix();
+        });
+    </script>
+
+</body>
+</html>

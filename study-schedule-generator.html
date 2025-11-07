@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Schedule Generator | EngiSimulation Tools</title>
+    <style>
+        /* Basic Styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #0056b3;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 10px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 4px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #1e7e34;
+        }
+        .schedule-output {
+            margin-top: 30px;
+            padding: 20px;
+            border: 2px solid #007bff;
+            border-radius: 4px;
+            background-color: #e6f7ff;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+        .warning {
+            color: red;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>🗓️ Study Schedule Generator</h2>
+        <p>Input your subjects and total daily study time to generate a balanced schedule.</p>
+
+        <div class="input-group">
+            <label for="subjects">Subjects (Separate with commas):</label>
+            <input type="text" id="subjects" placeholder="e.g., Math, History, Physics, English" value="Math, History, Physics, English">
+
+            <label for="totalHours">Total Daily Study Hours:</label>
+            <input type="number" id="totalHours" value="4" min="1" step="0.5" placeholder="e.g., 4">
+            
+            <label for="startTime">Start Time (24-hour format):</label>
+            <input type="number" id="startTime" value="9" min="0" max="23" step="1" placeholder="e.g., 9 for 9:00 AM">
+            
+            <button onclick="generateSchedule()">Generate Schedule</button>
+        </div>
+
+        <div class="schedule-output">
+            <h3>Generated Study Plan:</h3>
+            <div id="outputTable">
+                Enter your subjects and study time above to generate a plan.
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function generateSchedule() {
+            const subjectsInput = document.getElementById('subjects').value.trim();
+            const totalHours = parseFloat(document.getElementById('totalHours').value);
+            const startTimeHour = parseInt(document.getElementById('startTime').value);
+            const outputTable = document.getElementById('outputTable');
+
+            // 1. Input Validation
+            if (!subjectsInput || isNaN(totalHours) || totalHours <= 0 || isNaN(startTimeHour)) {
+                outputTable.innerHTML = `<p class="warning">Please enter a valid list of subjects and a total study time greater than zero.</p>`;
+                return;
+            }
+
+            const subjects = subjectsInput.split(',').map(s => s.trim()).filter(s => s.length > 0);
+            const numSubjects = subjects.length;
+
+            if (numSubjects === 0) {
+                outputTable.innerHTML = `<p class="warning">Please enter at least one subject.</p>`;
+                return;
+            }
+
+            // 2. Calculation
+            // Time per subject in hours (decimal)
+            const timePerSubjectHours = totalHours / numSubjects;
+            
+            // Convert time per subject to minutes for better precision
+            const timePerSubjectMinutes = timePerSubjectHours * 60;
+            
+            // Time formatting helper
+            const formatTime = (hour, minute) => {
+                const hour12 = hour % 12 || 12;
+                const period = hour < 12 || hour === 24 ? 'AM' : 'PM';
+                const minuteStr = String(minute).padStart(2, '0');
+                return `${hour12}:${minuteStr} ${period}`;
+            };
+
+            // 3. Generate Schedule Table HTML
+            let currentTimeHour = startTimeHour;
+            let currentTimeMinute = 0;
+            let tableHTML = `
+                <table>
+                    <tr>
+                        <th>Time Slot</th>
+                        <th>Subject</th>
+                        <th>Duration</th>
+                    </tr>
+            `;
+
+            for (let i = 0; i < numSubjects; i++) {
+                const subject = subjects[i];
+                
+                // Calculate end time
+                let startTimeTotalMinutes = (currentTimeHour * 60) + currentTimeMinute;
+                let endTimeTotalMinutes = startTimeTotalMinutes + timePerSubjectMinutes;
+
+                // Handle fractional minutes by rounding (to avoid extremely messy floating points)
+                // We'll use Math.round for end time minutes to simplify the display
+                let endHour = Math.floor((endTimeTotalMinutes / 60) % 24);
+                let endMinute = Math.round(endTimeTotalMinutes % 60);
+
+                // Correct for minute overflow (e.g., 60 minutes becomes 1 hour 0 minutes)
+                if (endMinute === 60) {
+                    endHour = (endHour + 1) % 24;
+                    endMinute = 0;
+                }
+                
+                const startTimeStr = formatTime(currentTimeHour, currentTimeMinute);
+                const endTimeStr = formatTime(endHour, endMinute);
+
+                // Add row to table
+                tableHTML += `
+                    <tr>
+                        <td>${startTimeStr} - ${endTimeStr}</td>
+                        <td><strong>${subject}</strong></td>
+                        <td>${timePerSubjectHours.toFixed(2)} hours</td>
+                    </tr>
+                `;
+
+                // Update current time for the next slot
+                currentTimeHour = endHour;
+                currentTimeMinute = endMinute;
+            }
+
+            tableHTML += `</table>`;
+            
+            // Summary information
+            tableHTML += `<p style="margin-top: 15px;"><strong>Summary:</strong> You have ${numSubjects} subjects. Each subject receives ${timePerSubjectHours.toFixed(2)} hours of study time.</p>`;
+
+            outputTable.innerHTML = tableHTML;
+        }
+
+        // Initialize with default schedule on load
+        document.addEventListener('DOMContentLoaded', generateSchedule);
+    </script>
+
+</body>
+</html>

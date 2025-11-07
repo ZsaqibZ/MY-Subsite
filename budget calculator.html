@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Monthly Budget Tracker | EngiSimulation Tools</title>
+    <style>
+        /* Basic Styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .container {
+            max-width: 700px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #0056b3;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 10px;
+        }
+        .section {
+            margin-bottom: 25px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="number"] {
+            width: calc(100% - 10px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 1em;
+        }
+        .expense-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .expense-item label {
+            width: 40%;
+            margin-bottom: 0;
+            font-weight: normal;
+        }
+        .expense-item input {
+            width: 55%;
+        }
+        
+        .summary {
+            margin-top: 20px;
+            padding: 20px;
+            border: 2px solid #28a745;
+            border-radius: 4px;
+            background-color: #e2ffe8;
+            font-size: 1.2em;
+        }
+        .summary p {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+        }
+        .summary strong {
+            color: #0056b3;
+        }
+        #remainingBalance {
+            font-size: 1.6em;
+            font-weight: bold;
+        }
+        .positive { color: #28a745; }
+        .negative { color: #dc3545; }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        .controls button {
+            padding: 8px 15px;
+            background-color: #f0ad4e;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .controls button:hover {
+            background-color: #ec971f;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>💵 Simple Monthly Budget Tracker</h2>
+        <p>Enter your monthly income and fixed expenses. Data is saved locally in your browser.</p>
+
+        <div class="section">
+            <h3>1. Monthly Income</h3>
+            <label for="income">Total Monthly Income ($):</label>
+            <input type="number" id="income" oninput="calculateBudget()" min="0">
+        </div>
+
+        <div class="section">
+            <h3>2. Fixed Expenses</h3>
+            
+            <div id="expenseList">
+                </div>
+            
+            <p style="font-size: 0.9em; margin-top: 15px;">*The remaining balance should cover all variable expenses (Food, Entertainment, etc.).</p>
+        </div>
+
+        <div class="summary">
+            <h3>3. Budget Summary</h3>
+            <p>Total Income: <strong>$<span id="totalIncome">0.00</span></strong></p>
+            <p>Total Expenses: <strong>$<span id="totalExpenses">0.00</span></strong></p>
+            <hr>
+            <p>Remaining Balance (for Variable Expenses):</p>
+            <p id="remainingBalance">$<span id="remainingValue">0.00</span></p>
+
+            <div class="controls">
+                <button onclick="clearAllData()">Reset All Data</button>
+                <span>Data last updated: <span id="lastUpdated">Never</span></span>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const EXPENSE_CATEGORIES = [
+            { id: "rent", name: "Rent/Mortgage" },
+            { id: "utilities", name: "Utilities" },
+            { id: "debt", name: "Debt Payments (Car/Loan)" },
+            { id: "insurance", name: "Insurance" },
+            { id: "subscriptions", name: "Subscriptions" },
+        ];
+
+        const STORAGE_KEY = 'budgetTrackerData';
+        let budgetData = {
+            income: 0,
+            expenses: {}
+        };
+
+        // --- Core Logic ---
+
+        function loadData() {
+            const storedData = localStorage.getItem(STORAGE_KEY);
+            if (storedData) {
+                budgetData = JSON.parse(storedData);
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(budgetData));
+            document.getElementById('lastUpdated').textContent = new Date().toLocaleTimeString();
+        }
+
+        function calculateBudget() {
+            // 1. Get Income
+            const incomeInput = document.getElementById('income');
+            const income = parseFloat(incomeInput.value) || 0;
+            budgetData.income = income;
+
+            // 2. Get Expenses
+            let totalExpenses = 0;
+            EXPENSE_CATEGORIES.forEach(cat => {
+                const input = document.getElementById(cat.id);
+                const value = parseFloat(input.value) || 0;
+                budgetData.expenses[cat.id] = value;
+                totalExpenses += value;
+            });
+            
+            // 3. Calculate Balance
+            const remaining = income - totalExpenses;
+
+            // 4. Update Display
+            document.getElementById('totalIncome').textContent = income.toFixed(2);
+            document.getElementById('totalExpenses').textContent = totalExpenses.toFixed(2);
+            document.getElementById('remainingValue').textContent = remaining.toFixed(2);
+
+            const remainingDisplay = document.getElementById('remainingBalance');
+            remainingDisplay.classList.remove('positive', 'negative');
+            
+            if (remaining >= 0) {
+                remainingDisplay.classList.add('positive');
+            } else {
+                remainingDisplay.classList.add('negative');
+            }
+
+            // 5. Save
+            saveData();
+        }
+
+        // --- Initialization and UI Setup ---
+
+        function generateExpenseInputs() {
+            const listDiv = document.getElementById('expenseList');
+            let html = '';
+            
+            EXPENSE_CATEGORIES.forEach(cat => {
+                html += `
+                    <div class="expense-item">
+                        <label for="${cat.id}">${cat.name} ($):</label>
+                        <input type="number" id="${cat.id}" oninput="calculateBudget()" min="0">
+                    </div>
+                `;
+            });
+            listDiv.innerHTML = html;
+        }
+
+        function renderDataToUI() {
+            document.getElementById('income').value = budgetData.income || '';
+
+            EXPENSE_CATEGORIES.forEach(cat => {
+                const input = document.getElementById(cat.id);
+                if (input) {
+                    input.value = budgetData.expenses[cat.id] || '';
+                }
+            });
+
+            // Recalculate based on loaded data
+            calculateBudget();
+        }
+
+        function clearAllData() {
+            if (confirm("Are you sure you want to reset ALL income and expense data? This action cannot be undone.")) {
+                localStorage.removeItem(STORAGE_KEY);
+                budgetData = { income: 0, expenses: {} };
+                renderDataToUI();
+                document.getElementById('lastUpdated').textContent = 'Cleared';
+            }
+        }
+
+        // --- Run on Load ---
+        document.addEventListener('DOMContentLoaded', () => {
+            generateExpenseInputs();
+            loadData();
+            renderDataToUI();
+        });
+    </script>
+
+</body>
+</html>

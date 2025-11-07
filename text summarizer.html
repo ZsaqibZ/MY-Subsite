@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Text Summarizer | EngiSimulation Tools</title>
+    <style>
+        /* Basic Styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #0056b3;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 10px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            min-height: 200px;
+            resize: vertical;
+        }
+        input[type="number"] {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #dc3545;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #c82333;
+        }
+        .summary-output {
+            margin-top: 30px;
+            padding: 20px;
+            border: 2px solid #007bff;
+            border-radius: 4px;
+            background-color: #e6f7ff;
+        }
+        .summary-text {
+            line-height: 1.6;
+        }
+        .stats {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>📑 Simple Text Summarizer</h2>
+        <p>This tool creates a basic summary by extracting the most important sentences based on word frequency.</p>
+
+        <div class="input-group">
+            <label for="textInput">Paste your text here:</label>
+            <textarea id="textInput" placeholder="Paste your article, essay, or document here..."></textarea>
+
+            <label for="sentenceCount">Number of sentences to extract for summary (e.g., 3-5):</label>
+            <input type="number" id="sentenceCount" value="5" min="1" max="20">
+            
+            <button onclick="summarizeText()">Generate Summary</button>
+        </div>
+
+        <div class="summary-output">
+            <h3>Summary:</h3>
+            <div id="summaryOutput" class="summary-text">
+                Paste text and click 'Generate Summary' above.
+            </div>
+            <div id="statsOutput" class="stats"></div>
+        </div>
+
+    </div>
+
+    <script>
+        // A list of common English "stop words" to ignore in frequency counting
+        const stopWords = new Set([
+            'a', 'an', 'and', 'are', 'as', 'at', 'be', 'but', 'by', 'for', 'if', 'in', 'into', 'is', 'it', 'no', 'not',
+            'of', 'on', 'or', 'such', 'that', 'the', 'their', 'then', 'there', 'these', 'they', 'this', 'to', 'was',
+            'will', 'with', 'from', 'which', 'what', 'when', 'where', 'who', 'whom', 'had', 'has', 'have', 'do', 'does',
+            'did', 'am', 'i', 'me', 'my', 'he', 'him', 'his', 'she', 'her', 'we', 'us', 'our', 'you', 'your', 'so', 'up', 'out'
+        ]);
+
+        function splitIntoSentences(text) {
+            // Basic sentence split using common punctuation marks followed by a space
+            return text.match(/[^.!?]+[.!?]+/g) || [];
+        }
+
+        function tokenizeAndFilter(text) {
+            // Convert to lowercase, remove punctuation, and split into words
+            const words = text.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").split(/\s+/);
+            // Filter out stop words
+            return words.filter(word => word.length > 2 && !stopWords.has(word));
+        }
+
+        function getWordFrequency(words) {
+            const frequency = {};
+            words.forEach(word => {
+                frequency[word] = (frequency[word] || 0) + 1;
+            });
+            return frequency;
+        }
+
+        function getSentenceScore(sentence, frequency) {
+            const sentenceWords = tokenizeAndFilter(sentence);
+            let score = 0;
+            sentenceWords.forEach(word => {
+                score += frequency[word] || 0;
+            });
+            return score;
+        }
+
+        function summarizeText() {
+            const textInput = document.getElementById('textInput').value.trim();
+            const sentenceCount = parseInt(document.getElementById('sentenceCount').value);
+            const summaryOutput = document.getElementById('summaryOutput');
+            const statsOutput = document.getElementById('statsOutput');
+            
+            summaryOutput.innerHTML = '';
+            statsOutput.innerHTML = '';
+
+            if (!textInput || isNaN(sentenceCount) || sentenceCount <= 0) {
+                summaryOutput.innerHTML = '<p style="color:red;">Please paste text and enter a valid number of sentences to extract.</p>';
+                return;
+            }
+
+            const sentences = splitIntoSentences(textInput);
+            if (sentences.length === 0) {
+                 summaryOutput.innerHTML = '<p style="color:red;">Could not parse any sentences. Check your text for proper punctuation.</p>';
+                 return;
+            }
+
+            // Step 1: Tokenize all text and calculate overall word frequency
+            const allWords = tokenizeAndFilter(textInput);
+            const frequencyMap = getWordFrequency(allWords);
+
+            // Step 2: Score each sentence
+            const scoredSentences = sentences.map((sentence, index) => ({
+                text: sentence.trim(),
+                score: getSentenceScore(sentence, frequencyMap),
+                index: index // Preserve original order
+            }));
+
+            // Step 3: Sort by score to find the best sentences
+            scoredSentences.sort((a, b) => b.score - a.score);
+
+            // Step 4: Extract the top N sentences
+            const summarySentences = scoredSentences.slice(0, sentenceCount);
+
+            // Step 5: Sort the extracted sentences back into their original order
+            summarySentences.sort((a, b) => a.index - b.index);
+
+            // Step 6: Join and display the summary
+            const finalSummary = summarySentences.map(s => s.text).join(' ');
+            
+            summaryOutput.textContent = finalSummary;
+
+            // Display Statistics
+            const originalWordCount = allWords.length + textInput.split(/\s+/).length - allWords.length; // Approximate full word count
+            const summaryWordCount = tokenizeAndFilter(finalSummary).length + summarySentences.length; // Approximate summary word count
+            
+            statsOutput.innerHTML = `
+                Original Text: ${sentences.length} sentences (~${originalWordCount} words) | 
+                Summary: ${summarySentences.length} sentences (~${summaryWordCount} words)
+            `;
+        }
+    </script>
+
+</body>
+</html>

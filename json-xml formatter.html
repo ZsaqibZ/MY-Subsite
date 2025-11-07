@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>JSON / XML Formatter & Validator</title>
+  <style>
+    :root{ --bg:#0b1220; --card:#071428; --muted:#9aa4b2; --accent:#06b6d4; --accent-2:#7c3aed; --danger:#ef4444; --glass:rgba(255,255,255,0.02); font-family:Inter,system-ui,Segoe UI,Roboto,Arial }
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;background:linear-gradient(180deg,#071527,#071021);color:#e6eef8;padding:28px}
+    .wrap{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 380px;gap:18px}
+    .card{background:linear-gradient(180deg,var(--card),#021118);border-radius:12px;padding:16px;border:1px solid rgba(255,255,255,0.03);box-shadow:0 6px 20px rgba(2,6,23,0.6)}
+    header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between}
+    h1{margin:0;font-size:18px}
+    .subtitle{color:var(--muted);font-size:13px}
+    textarea{width:100%;min-height:260px;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit;font-family:monospace;font-size:13px;resize:vertical}
+    .controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .btn{background:linear-gradient(180deg,var(--accent-2),#5b21b6);padding:8px 12px;border-radius:8px;border:none;color:white;cursor:pointer;font-weight:600}
+    .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04)}
+    .small{font-size:13px;color:var(--muted)}
+    .row{display:flex;gap:8px;align-items:center}
+    .tab{display:flex;gap:8px;margin-top:8px}
+    .tab button{padding:8px 10px;border-radius:8px;border:none;background:transparent;color:var(--muted);cursor:pointer}
+    .tab button.active{background:rgba(255,255,255,0.03);color:white}
+    .result{white-space:pre-wrap;font-family:monospace;font-size:13px;overflow:auto;max-height:280px;padding:10px;border-radius:8px;background:var(--glass);border:1px dashed rgba(255,255,255,0.03)}
+    label{font-size:13px;color:var(--muted)}
+    .tips{margin-top:12px;font-size:13px;color:var(--muted)}
+    .footer{grid-column:1/-1;margin-top:12px;display:flex;justify-content:space-between}
+    @media(max-width:980px){.wrap{grid-template-columns:1fr;padding:8px}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>JSON / XML Formatter & Validator</h1>
+        <div class="subtitle">Validate, prettify, minify, and convert between JSON &amp; XML.</div>
+      </div>
+      <div class="small">Copy / Paste friendly • No external libs</div>
+    </header>
+
+    <main class="card">
+      <label for="inputArea">Input (JSON or XML)</label>
+      <textarea id="inputArea" placeholder='Paste JSON or XML here...'></textarea>
+
+      <div class="tab" role="tablist">
+        <button id="autoTab" class="active">Auto-detect</button>
+        <button id="jsonTab">Force JSON</button>
+        <button id="xmlTab">Force XML</button>
+      </div>
+
+      <div class="controls">
+        <button class="btn" id="formatBtn">Format / Validate</button>
+        <button class="btn" id="minifyBtn">Minify</button>
+        <button class="btn ghost" id="toXmlBtn">Convert → XML</button>
+        <button class="btn ghost" id="toJsonBtn">Convert → JSON</button>
+        <button class="btn ghost" id="copyBtn">Copy Output</button>
+      </div>
+
+      <div style="margin-top:12px">
+        <label class="small">Output</label>
+        <div id="output" class="result">—</div>
+      </div>
+
+      <div class="tips">
+        <strong>Tips:</strong> Use <code>Format</code> to validate and pretty-print. Conversion attempts best-effort parsing; complex XML with attributes may require manual tweaks.
+      </div>
+    </main>
+
+    <aside class="card">
+      <label class="small">Options</label>
+      <div style="margin-top:8px;display:flex;flex-direction:column;gap:8px">
+        <label class="row"><input type="checkbox" id="optSort" /> <span style="margin-left:8px">Sort keys (JSON)</span></label>
+        <label class="row"><input type="checkbox" id="optPreserveAttr" checked /> <span style="margin-left:8px">Preserve XML attributes as @attr</span></label>
+        <label class="row"><input type="checkbox" id="optArray" checked /> <span style="margin-left:8px">Infer repeated elements as arrays</span></label>
+      </div>
+
+      <div style="margin-top:14px">
+        <label class="small">Examples</label>
+        <pre class="small" style="background:var(--glass);padding:8px;border-radius:8px;margin-top:8px;font-family:monospace">{"name":"Alice","age":30}
+
+&lt;user&gt;&lt;name&gt;Alice&lt;/name&gt;&lt;age&gt;30&lt;/age&gt;&lt;/user&gt;</pre>
+      </div>
+
+      <div style="margin-top:12px;display:flex;gap:8px">
+        <button class="btn ghost" id="loadExample">Load Example</button>
+        <button class="btn ghost" id="clearBtn">Clear</button>
+      </div>
+    </aside>
+
+    <div class="footer">
+      <div class="small">Designed for your tools suite</div>
+      <div class="small">Supports large payloads — be mindful of browser limits</div>
+    </div>
+  </div>
+
+  <script>
+    const inputArea = document.getElementById('inputArea');
+    const output = document.getElementById('output');
+    const formatBtn = document.getElementById('formatBtn');
+    const minifyBtn = document.getElementById('minifyBtn');
+    const toXmlBtn = document.getElementById('toXmlBtn');
+    const toJsonBtn = document.getElementById('toJsonBtn');
+    const copyBtn = document.getElementById('copyBtn');
+    const loadExample = document.getElementById('loadExample');
+    const clearBtn = document.getElementById('clearBtn');
+
+    const autoTab = document.getElementById('autoTab');
+    const jsonTab = document.getElementById('jsonTab');
+    const xmlTab = document.getElementById('xmlTab');
+
+    const optSort = document.getElementById('optSort');
+    const optPreserveAttr = document.getElementById('optPreserveAttr');
+    const optArray = document.getElementById('optArray');
+
+    let forcedMode = 'auto';
+    function setTab(mode){ forcedMode = mode; [autoTab,jsonTab,xmlTab].forEach(b=>b.classList.remove('active')); if(mode==='auto') autoTab.classList.add('active'); if(mode==='json') jsonTab.classList.add('active'); if(mode==='xml') xmlTab.classList.add('active'); }
+    autoTab.addEventListener('click', ()=>setTab('auto'));
+    jsonTab.addEventListener('click', ()=>setTab('json'));
+    xmlTab.addEventListener('click', ()=>setTab('xml'));
+
+    // helpers
+    function isLikelyJson(s){ const t = s.trim(); return t.startsWith('{')||t.startsWith('[');
+    }
+    function isLikelyXml(s){ return s.trim().startsWith('<'); }
+
+    function tryParseJson(s){ try{ return {ok:true, data: JSON.parse(s)} }catch(e){ return {ok:false, error:e.message} } }
+
+    function formatJson(obj){ let ordered = obj; if(optSort.checked){ ordered = sortKeysDeep(obj); } return JSON.stringify(ordered, null, 2); }
+    function sortKeysDeep(obj){ if(Array.isArray(obj)) return obj.map(sortKeysDeep); if(obj && typeof obj==='object'){
+      const keys = Object.keys(obj).sort(); const out = {}; for(const k of keys) out[k]=sortKeysDeep(obj[k]); return out }
+      return obj }
+
+    // XML <-> JSON simple converters (best-effort)
+    function xmlToJson(xmlStr){ // simple parser using DOMParser
+      try{
+        const parser = new DOMParser(); const doc = parser.parseFromString(xmlStr, 'application/xml');
+        const parsererror = doc.getElementsByTagName('parsererror'); if(parsererror.length) return {ok:false, error:parsererror[0].textContent};
+        function nodeToObj(node){
+          // text node
+          if(node.nodeType===3) return node.nodeValue.trim();
+          const obj = {};
+          // attributes
+          if(node.attributes && node.attributes.length>0){ for(let a of node.attributes){ obj['@'+a.name]=a.value } }
+          // children
+          const childCounts = {};
+          for(let child of node.childNodes){ if(child.nodeType===3 && !child.nodeValue.trim()) continue; const name = child.nodeType===3? '#text': child.nodeName; childCounts[name] = (childCounts[name]||0)+1 }
+          for(let child of node.childNodes){ if(child.nodeType===3 && !child.nodeValue.trim()) continue; const name = child.nodeType===3? '#text': child.nodeName; const val = nodeToObj(child); if(name==='#text'){
+              // if only text, return as value
+              if(Object.keys(obj).length===0 && childCounts['#text']===1) return val
+              obj['#text'] = val; continue
+            }
+            // handle arrays
+            if(childCounts[name]>1){ obj[name] = obj[name]||[]; obj[name].push(val); } else { obj[name]=val }
+          }
+          return obj;
+        }
+        // if multiple root nodes, wrap them
+        const root = doc.documentElement;
+        const res = {};
+        res[root.nodeName] = nodeToObj(root);
+        return {ok:true, data:res};
+      }catch(e){ return {ok:false, error:e.message} }
+    }
+
+    function jsonToXml(obj, rootName='root'){
+      function build(nodeName, value){
+        if(value===null || value===undefined) return `<${nodeName}/>`;
+        if(typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') return `<${nodeName}>${escapeXml(String(value))}</${nodeName}>`;
+        if(Array.isArray(value)) return value.map(v=>build(nodeName, v)).join('');
+        if(typeof value === 'object'){
+          // attributes prefixed with @
+          const attrs = Object.entries(value).filter(([k])=>k.startsWith('@'))
+            .map(([k,v])=>`${k.slice(1)}="${escapeXml(String(v))}"`).join(' ');
+          const children = Object.entries(value).filter(([k])=>!k.startsWith('@')).map(([k,v])=>build(k,v)).join('');
+          return `<${nodeName}${attrs? ' '+attrs: ''}>${children}</${nodeName}>`;
+        }
+        return '';
+      }
+      return `<?xml version="1.0" encoding="utf-8"?>\n${build(rootName,obj)}`;
+    }
+
+    function escapeXml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+    // Actions
+    formatBtn.addEventListener('click', ()=>{
+      const s = inputArea.value.trim(); if(!s){ output.textContent = 'No input.'; return }
+      const mode = forcedMode;
+      if(mode==='json' || (mode==='auto' && isLikelyJson(s))){ const res = tryParseJson(s); if(!res.ok){ output.textContent = 'JSON parse error: ' + res.error; return } try{ output.textContent = formatJson(res.data); }catch(e){ output.textContent = 'Error formatting JSON: '+e.message } return }
+      if(mode==='xml' || (mode==='auto' && isLikelyXml(s))){ const r = xmlToJson(s); if(!r.ok){ output.textContent = 'XML parse error: ' + r.error; return } try{ output.textContent = JSON.stringify(r.data, null, 2); }catch(e){ output.textContent = 'Error converting XML to JSON: '+e.message } return }
+      // fallback: try json then xml
+      const rj = tryParseJson(s); if(rj.ok){ output.textContent = formatJson(rj.data); return }
+      const rx = xmlToJson(s); if(rx.ok){ output.textContent = JSON.stringify(rx.data, null,2); return }
+      output.textContent = 'Unable to detect format. Try forcing JSON or XML.';
+    });
+
+    minifyBtn.addEventListener('click', ()=>{
+      const s = inputArea.value.trim(); if(!s){ output.textContent='No input.'; return }
+      if(isLikelyJson(s) || forcedMode==='json'){
+        const r = tryParseJson(s); if(!r.ok){ output.textContent='JSON parse error: '+r.error; return } output.textContent = JSON.stringify(r.data);
+      } else if(isLikelyXml(s) || forcedMode==='xml'){
+        // remove whitespace between tags
+        output.textContent = inputArea.value.replace(/>\s+</g,'><').trim();
+      } else { // try both
+        const rj = tryParseJson(s); if(rj.ok){ output.textContent = JSON.stringify(rj.data); return } output.textContent = inputArea.value.replace(/>\s+</g,'><').trim(); }
+    });
+
+    toXmlBtn.addEventListener('click', ()=>{
+      const s = inputArea.value.trim(); if(!s){ output.textContent='No input.'; return }
+      let r = tryParseJson(s);
+      if(!r.ok){ // maybe it's xml already? try convert xml->json then back
+        const rx = xmlToJson(s); if(!rx.ok){ output.textContent='Input is not valid JSON. JSON parse error: '+r.error; return } try{ const xml = jsonToXml(rx.data); output.textContent = xml; }catch(e){ output.textContent='Conversion error: '+e.message }
+      }else{
+        try{ const xml = jsonToXml(r.data, 'root'); output.textContent = xml }catch(e){ output.textContent='Conversion error: '+e.message }
+      }
+    });
+
+    toJsonBtn.addEventListener('click', ()=>{
+      const s = inputArea.value.trim(); if(!s){ output.textContent='No input.'; return }
+      const rx = xmlToJson(s); if(!rx.ok){ output.textContent='XML parse error: '+rx.error; return }
+      output.textContent = JSON.stringify(rx.data, null, 2);
+    });
+
+    copyBtn.addEventListener('click', ()=>{
+      navigator.clipboard.writeText(output.textContent||'').then(()=>{ copyBtn.textContent='Copied ✓'; setTimeout(()=>copyBtn.textContent='Copy Output',900) })
+    });
+
+    loadExample.addEventListener('click', ()=>{
+      inputArea.value = '{\"user\":{\"name\":\"Alice\",\"age\":30}}'; inputArea.dispatchEvent(new Event('input'));
+    });
+
+    clearBtn.addEventListener('click', ()=>{ inputArea.value=''; output.textContent='—'; });
+
+  </script>
+</body>
+</html>

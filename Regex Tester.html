@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Regex Tester</title>
+  <style>
+    :root{
+      --bg:#0f1724; --card:#0b1220; --muted:#9aa4b2; --accent:#4f46e5; --danger:#ef4444; --glass: rgba(255,255,255,0.03);
+      --success:#10b981; --panel:#071021; --glass-2: rgba(255,255,255,0.02);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; background:linear-gradient(180deg,var(--bg),#061021 120%); color:#e6eef8; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; padding:28px;
+    }
+    .container{max-width:1100px;margin:0 auto; display:grid; grid-template-columns: 1fr 420px; gap:20px; align-items:start}
+    header{grid-column:1/-1; display:flex; align-items:center; justify-content:space-between; gap:12px}
+    h1{font-size:20px;margin:0}
+    .subtitle{color:var(--muted); font-size:13px}
+    .card{background:linear-gradient(180deg,var(--card), var(--panel)); border-radius:14px; padding:18px; box-shadow:0 6px 24px rgba(2,6,23,0.6); border:1px solid rgba(255,255,255,0.03)}
+    .left .card{min-height:520px}
+    label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
+    .row{display:flex; gap:10px; align-items:center}
+    input[type=text], textarea, .code-input{width:100%; padding:12px 14px; border-radius:10px; border:1px solid rgba(255,255,255,0.04); background:transparent; color:inherit; font-family:monospace; font-size:14px}
+    textarea{min-height:140px; resize:vertical}
+    .controls{display:flex; gap:8px; flex-wrap:wrap}
+    .btn{background:linear-gradient(180deg,var(--accent), #3c32b5); padding:8px 12px; border-radius:10px; color:white; border:none; cursor:pointer; font-weight:600}
+    .btn.ghost{background:transparent; border:1px solid rgba(255,255,255,0.04)}
+    .flags{display:flex; gap:8px; align-items:center; padding:8px 0}
+    .flag{display:inline-flex; align-items:center; gap:6px; font-size:13px}
+    .meta{display:flex; justify-content:space-between; gap:12px; margin-top:10px}
+    .matches{margin-top:14px}
+    .match-item{background:var(--glass); padding:8px 10px; border-radius:8px; font-family:monospace; font-size:13px; margin-bottom:8px}
+    .preview{border-radius:10px; padding:12px; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border:1px dashed rgba(255,255,255,0.03); min-height:120px; overflow:auto}
+    .highlight{background: linear-gradient(90deg,#fef08a, #f59e0b); color:#091018; padding:0 2px; border-radius:3px}
+    .danger{color:var(--danger)}
+    .small{font-size:12px; color:var(--muted)}
+    .cheats{display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-top:12px}
+    .cheat-card{background:var(--glass-2); padding:8px; border-radius:8px; font-size:13px}
+    footer{grid-column:1/-1; margin-top:14px; display:flex; justify-content:space-between; gap:12px; align-items:center}
+    .tools-list{display:flex; gap:8px; flex-wrap:wrap}
+    .kbd{background:rgba(255,255,255,0.03); padding:6px 8px; border-radius:6px; font-family:monospace; font-size:13px}
+    @media(max-width:980px){.container{grid-template-columns:1fr; padding:10px} .left{order:2} .right{order:1}}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>Regex Tester</h1>
+        <div class="subtitle">Build, test & debug regular expressions</div>
+      </div>
+      <div class="small">No telemetry • Exportable</div>
+    </header>
+
+    <section class="left">
+      <div class="card">
+        <label for="pattern">Regex pattern</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input id="pattern" class="code-input" type="text" placeholder="e.g. \b(\w+)@(\w+\.\w{2,})\b" spellcheck="false" value="" />
+          <button class="btn" id="testBtn">Test</button>
+          <button class="btn ghost" id="clearBtn">Clear</button>
+        </div>
+        <div class="flags" style="margin-top:8px">
+          <label class="flag"><input type="checkbox" id="flag_g" checked /> g</label>
+          <label class="flag"><input type="checkbox" id="flag_i" /> i</label>
+          <label class="flag"><input type="checkbox" id="flag_m" /> m</label>
+          <label class="flag"><input type="checkbox" id="flag_s" /> s</label>
+          <label class="flag"><input type="checkbox" id="flag_u" /> u</label>
+          <label class="flag"><input type="checkbox" id="flag_y" /> y</label>
+        </div>
+
+        <label style="margin-top:12px" for="testText">Test text</label>
+        <textarea id="testText" placeholder="Paste sample text here..." spellcheck="false"></textarea>
+
+        <div class="meta">
+          <div class="small">Matches found: <span id="matchCount">0</span></div>
+          <div class="small">Last error: <span id="lastError" class="danger">—</span></div>
+        </div>
+
+        <div class="matches" id="matchesContainer"></div>
+
+        <div style="margin-top:12px; display:flex; gap:8px; align-items:center">
+          <label style="margin:0; width:70px">Replace</label>
+          <input id="replaceInput" type="text" placeholder="Replacement (supports $1, $2...)" />
+          <button class="btn" id="previewReplace">Preview</button>
+          <button class="btn ghost" id="applyReplace">Apply</button>
+        </div>
+
+        <div style="margin-top:12px">
+          <label class="small">Preview</label>
+          <div class="preview" id="preview"></div>
+        </div>
+
+      </div>
+    </section>
+
+    <aside class="right">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <strong>Utilities</strong>
+            <div class="small">Quick actions & export</div>
+          </div>
+        </div>
+        <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px">
+          <button class="btn ghost" id="copyPattern">Copy Pattern</button>
+          <button class="btn ghost" id="saveSession">Save Session</button>
+          <button class="btn ghost" id="loadSession">Load Session</button>
+          <button class="btn ghost" id="downloadTxt">Download Sample</button>
+        </div>
+
+        <div style="margin-top:14px">
+          <label class="small">Cheatsheet</label>
+          <div class="cheats">
+            <div class="cheat-card"><strong>Meta</strong><div class="small">^ $ . * + ? { } [ ] ( ) | \\</div></div>
+            <div class="cheat-card"><strong>Shorthand</strong><div class="small">\d \D \w \W \s \S</div></div>
+            <div class="cheat-card"><strong>Groups</strong><div class="small">( ) non-capturing: (?: ) named: (?&lt;name&gt; )</div></div>
+            <div class="cheat-card"><strong>Quantifiers</strong><div class="small">* + ? {n} {n,} {n,m}</div></div>
+          </div>
+        </div>
+
+        <div style="margin-top:14px">
+          <label class="small">Keyboard</label>
+          <div style="display:flex;gap:8px;margin-top:6px" class="tools-list">
+            <div class="kbd">Ctrl + Enter: Test</div>
+            <div class="kbd">Ctrl + S: Save</div>
+            <div class="kbd">Ctrl + L: Load</div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="card" style="margin-top:12px">
+        <label class="small">Match details</label>
+        <div id="matchDetails" style="margin-top:8px; font-size:13px; min-height:140px"></div>
+      </div>
+    </aside>
+
+    <footer>
+      <div class="small">Built with HTML, CSS, and JavaScript</div>
+      <div class="small">Export: .txt session • Copy to clipboard</div>
+    </footer>
+  </div>
+
+  <script>
+    const patternEl = document.getElementById('pattern');
+    const testBtn = document.getElementById('testBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const testText = document.getElementById('testText');
+    const matchCount = document.getElementById('matchCount');
+    const lastError = document.getElementById('lastError');
+    const matchesContainer = document.getElementById('matchesContainer');
+    const previewEl = document.getElementById('preview');
+    const replaceInput = document.getElementById('replaceInput');
+    const previewReplace = document.getElementById('previewReplace');
+    const applyReplace = document.getElementById('applyReplace');
+    const copyPattern = document.getElementById('copyPattern');
+    const saveSession = document.getElementById('saveSession');
+    const loadSession = document.getElementById('loadSession');
+    const downloadTxt = document.getElementById('downloadTxt');
+    const matchDetails = document.getElementById('matchDetails');
+
+    const flags = ['g','i','m','s','u','y'].reduce((acc,f)=>{ acc[f]=document.getElementById('flag_'+f); return acc}, {});
+
+    function getFlagsString(){ return Object.entries(flags).filter(([k,el])=>el.checked).map(([k])=>k).join(''); }
+
+    function safeCreateRegExp(pattern, flagsStr){ try{ return new RegExp(pattern, flagsStr); }catch(e){ throw e } }
+
+    function runTest(){
+      const pattern = patternEl.value;
+      const text = testText.value;
+      const flagsStr = getFlagsString();
+      matchesContainer.innerHTML = '';
+      matchDetails.innerHTML = '';
+      previewEl.innerHTML = '';
+      lastError.textContent = '—';
+      if(!pattern){ matchCount.textContent = 0; previewEl.textContent = text; return }
+      let re;
+      try{
+        re = safeCreateRegExp(pattern, flagsStr);
+      }catch(err){ lastError.textContent = err.message; lastError.classList.add('danger'); matchCount.textContent = 0; return }
+
+      try{
+        const isGlobal = flagsStr.includes('g');
+        let matches = [];
+        if(isGlobal){
+          let m;
+          while((m = re.exec(text)) !== null){
+            matches.push({match:m[0], groups: m.slice(1), index:m.index});
+            if(m.index === re.lastIndex) re.lastIndex++;
+          }
+        } else {
+          const m = re.exec(text);
+          if(m) matches.push({match:m[0], groups:m.slice(1), index:m.index});
+        }
+
+        matchCount.textContent = matches.length;
+        matches.forEach((m,idx)=>{
+          const div = document.createElement('div'); div.className='match-item';
+          div.innerHTML = `<strong>#${idx+1}</strong> @ ${m.index} — <code>${escapeHtml(m.match)}</code>`;
+          matchesContainer.appendChild(div);
+        });
+
+        if(matches.length){
+          const first = matches[0];
+          let html = `<div><strong>Index:</strong> ${first.index}</div>`;
+          html += `<div><strong>Match:</strong> <code>${escapeHtml(first.match)}</code></div>`;
+          html += `<div style="margin-top:8px"><strong>Groups</strong></div>`;
+          if(first.groups.length===0) html += '<div class="small">(no capture groups)</div>';
+          first.groups.forEach((g,i)=>{ html += `<div class="small">$${i+1}: <code>${escapeHtml(g===undefined?'<undefined>':g)}</code></div>` });
+          matchDetails.innerHTML = html;
+        }
+
+        previewEl.innerHTML = highlightMatches(text, matches);
+
+      }catch(err){ lastError.textContent = err.message; lastError.classList.add('danger'); matchCount.textContent = 0 }
+    }
+
+    function highlightMatches(text, matches){
+      if(!matches.length) return escapeHtml(text);
+      let out = '';
+      let cursor = 0;
+      matches.forEach(m =>{
+        if(m.index > cursor) out += escapeHtml(text.slice(cursor, m.index));
+        out += `<span class="highlight">${escapeHtml(m.match)}</span>`;
+        cursor = m.index + m.match.length;
+      });
+      if(cursor < text.length) out += escapeHtml(text.slice(cursor));
+      return out.replace(/\n/g,'<br>');
+    }
+
+    function escapeHtml(s){ return (s+'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/\'/g,'&#039;').replace(/\n/g,'\n'); }
+
+    function runReplacePreview(){
+      const pattern = patternEl.value; const text = testText.value; const flagsStr = getFlagsString(); const repl = replaceInput.value;
+      if(!pattern) return; let re; try{ re = safeCreateRegExp(pattern, flagsStr); } catch(err){ lastError.textContent = err.message; return }
+      try{
+        const replaced = text.replace(re, repl);
+        previewEl.innerHTML = escapeHtml(replaced).replace(/\n/g,'<br>');
+      }catch(err){ lastError.textContent = err.message }
+    }
+
+    function applyReplacement(){
+      const pattern = patternEl.value; const flagsStr = getFlagsString(); const repl = replaceInput.value; let re; try{ re = safeCreateRegExp(pattern, flagsStr); }catch(err){ lastError.textContent = err.message; return }
+      try{ testText.value = testText.value.replace(re, repl); runTest(); }catch(err){ lastError.textContent = err.message }
+    }
+
+    copyPattern.addEventListener('click', ()=>{ navigator.clipboard.writeText(patternEl.value || '').then(()=>{ copyPattern.textContent='Copied ✓'; setTimeout(()=>copyPattern.textContent='Copy Pattern',900) }) });
+
+    saveSession.addEventListener('click', ()=>{
+      const payload = {pattern:patternEl.value, flags:getFlagsString(), text:testText.value, replace:replaceInput.value, ts: Date.now()}
+      localStorage.setItem('regex_tester_session', JSON.stringify(payload));
+      saveSession.textContent = 'Saved ✓'; setTimeout(()=>saveSession.textContent='Save Session',900);
+    });
+
+    loadSession.addEventListener('click', ()=>{
+      const raw = localStorage.getItem('regex_tester_session');
+      if(!raw){ loadSession.textContent='No session'; setTimeout(()=>loadSession.textContent='Load Session',900); return }
+      try{
+ const p = JSON.parse(raw); patternEl.value=p.pattern||''; testText.value=p.text||''; replaceInput.value=p.replace||'';
+        // set flags
+        ['g','i','m','s','u','y'].forEach(ch=>{ document.getElementById('flag_'+ch).checked = (p.flags||'').includes(ch) });
+        runTest(); loadSession.textContent='Loaded ✓'; setTimeout(()=>loadSession.textContent='Load Session',900);
+      }catch(e){ loadSession.textContent='Corrupt'; setTimeout(()=>loadSession.textContent='Load Session',900) }
+    });
+
+    // Download sample text
+    downloadTxt.addEventListener('click', ()=>{
+      const blob = new Blob([testText.value||''], {type:'text/plain'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download='sample.txt'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+      downloadTxt.textContent='Downloaded ✓'; setTimeout(()=>downloadTxt.textContent='Download Sample',900)
+    });
+
+    // Event bindings
+    testBtn.addEventListener('click', runTest);
+    clearBtn.addEventListener('click', ()=>{ patternEl.value=''; testText.value=''; replaceInput.value=''; matchesContainer.innerHTML=''; matchDetails.innerHTML=''; matchCount.textContent=0; previewEl.textContent=''; lastError.textContent='—' });
+
+    previewReplace.addEventListener('click', runReplacePreview);
+    applyReplace.addEventListener('click', applyReplacement);
+
+    // keyboard shortcuts
+    document.addEventListener('keydown', (e)=>{
+      if(e.ctrlKey && e.key === 'Enter'){ e.preventDefault(); runTest(); }
+      if(e.ctrlKey && e.key.toLowerCase() === 's'){ e.preventDefault(); saveSession.click(); }
+      if(e.ctrlKey && e.key.toLowerCase() === 'l'){ e.preventDefault(); loadSession.click(); }
+    });
+
+    // auto-run on input with debounce
+    let timer;
+    [patternEl, testText].forEach(el=> el.addEventListener('input', ()=>{ clearTimeout(timer); timer=setTimeout(runTest,400) }));
+    [replaceInput].forEach(el=> el.addEventListener('input', ()=>{ clearTimeout(timer); timer=setTimeout(runReplacePreview,400) }));
+
+    // initial state
+    previewEl.textContent = '';
+
+  </script>
+</body>
+</html>

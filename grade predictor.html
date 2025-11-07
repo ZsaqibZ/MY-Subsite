@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grade Predictor | EngiSimulation Tools</title>
+    <style>
+        /* Basic Styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .container {
+            max-width: 700px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #0056b3;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 10px;
+        }
+        .input-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .grades-container {
+            grid-column: 1 / -1; /* Span two columns */
+        }
+        .grade-item {
+            display: grid;
+            grid-template-columns: 3fr 2fr 1fr; /* Name, Score/Weight, Delete */
+            gap: 10px;
+            margin-bottom: 5px;
+            align-items: center;
+        }
+        .grade-item input {
+            margin-bottom: 0;
+        }
+        .add-remove-btn {
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            border: none;
+        }
+        #addGrade {
+            background-color: #28a745;
+            color: white;
+            grid-column: 1 / -1;
+        }
+        .remove-btn {
+            background-color: #dc3545;
+            color: white;
+            font-weight: bold;
+        }
+        button[onclick="calculateRequiredScore()"] {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+            grid-column: 1 / -1;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result-output {
+            margin-top: 30px;
+            padding: 20px;
+            border: 2px solid #ffc107;
+            border-radius: 4px;
+            background-color: #fff9e6;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+        .warning {
+            color: red;
+            font-weight: normal;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>🎯 Grade Predictor: Calculate Your Final Score Need</h2>
+        <p>Determine the score needed on your final exam/project to hit your target overall course grade.</p>
+
+        <div class="input-section">
+            <div style="grid-column: 1 / -1;">
+                <label for="targetGrade">Target Overall Course Grade (%):</label>
+                <input type="number" id="targetGrade" value="80" min="0" max="100" required>
+            </div>
+            
+            <div class="grades-container">
+                <h3>Current Grade Components:</h3>
+                <div class="grade-item" style="font-weight: bold;">
+                    <span>Component Name</span>
+                    <span>Score (%)</span>
+                    <span>Weight (%)</span>
+                    <span>Action</span>
+                </div>
+                <div id="gradeInputs">
+                    </div>
+                <button id="addGrade" class="add-remove-btn" onclick="addGradeInput()">+ Add Component</button>
+            </div>
+
+            <div style="grid-column: 1 / -1;">
+                <label for="finalWeight">Final Exam/Project Weight (% of Total Grade):</label>
+                <input type="number" id="finalWeight" value="30" min="1" max="100" required>
+            </div>
+
+            <button onclick="calculateRequiredScore()">Calculate Required Final Score</button>
+        </div>
+
+        <div class="result-output">
+            <p id="resultOutput">Enter your data and click 'Calculate'.</p>
+        </div>
+
+    </div>
+
+    <script>
+        function addGradeInput(defaultName = 'Assignment', defaultScore = 90, defaultWeight = 10) {
+            const container = document.getElementById('gradeInputs');
+            const newIndex = container.children.length;
+
+            const gradeDiv = document.createElement('div');
+            gradeDiv.classList.add('grade-item');
+            gradeDiv.setAttribute('data-index', newIndex);
+
+            gradeDiv.innerHTML = `
+                <input type="text" placeholder="e.g., Midterm" value="${defaultName}">
+                <input type="number" class="score" value="${defaultScore}" min="0" max="100">
+                <input type="number" class="weight" value="${defaultWeight}" min="0" max="100">
+                <button class="remove-btn add-remove-btn" onclick="removeGradeInput(this)">X</button>
+            `;
+            container.appendChild(gradeDiv);
+        }
+
+        function removeGradeInput(button) {
+            button.closest('.grade-item').remove();
+        }
+
+        function calculateRequiredScore() {
+            const targetGrade = parseFloat(document.getElementById('targetGrade').value);
+            const finalWeight = parseFloat(document.getElementById('finalWeight').value);
+            const gradeItems = document.querySelectorAll('#gradeInputs .grade-item');
+            const resultOutput = document.getElementById('resultOutput');
+
+            if (isNaN(targetGrade) || isNaN(finalWeight) || finalWeight <= 0) {
+                resultOutput.innerHTML = '<span class="warning">Error: Please enter valid target grade and final weight.</span>';
+                return;
+            }
+
+            let weightedCurrentScore = 0;
+            let totalCurrentWeight = 0;
+            let errors = [];
+
+            // 1. Calculate current standing
+            gradeItems.forEach((item, index) => {
+                const score = parseFloat(item.querySelector('.score').value);
+                const weight = parseFloat(item.querySelector('.weight').value);
+                const name = item.querySelector('input[type="text"]').value.trim() || `Component ${index + 1}`;
+
+                if (isNaN(score) || isNaN(weight) || score < 0 || weight < 0) {
+                    errors.push(`Invalid score/weight for "${name}".`);
+                    return;
+                }
+
+                weightedCurrentScore += (score * weight);
+                totalCurrentWeight += weight;
+            });
+
+            if (errors.length > 0) {
+                resultOutput.innerHTML = '<span class="warning">Error(s) found in component entries: <ul><li>' + errors.join('</li><li>') + '</li></ul></span>';
+                return;
+            }
+
+            // 2. Check Total Weight
+            const totalCourseWeight = totalCurrentWeight + finalWeight;
+            if (totalCourseWeight > 100.01 || totalCourseWeight < 99.99) { // Use a small tolerance for floating point
+                 resultOutput.innerHTML = `<span class="warning">Warning: Total course weight (${totalCourseWeight.toFixed(2)}%) is not exactly 100%. Calculations may be slightly inaccurate.</span>`;
+                 // Continue calculation despite warning
+            }
+
+            // 3. Calculation
+            // Weighted target score needed for the whole course (out of 100)
+            const weightedTarget = targetGrade * totalCourseWeight; 
+
+            // Weighted score that must come from the Final Exam/Project
+            const requiredWeightedFinalScore = weightedTarget - weightedCurrentScore;
+
+            // Final score percentage required on the Final Exam/Project (Score / Weight)
+            let requiredScore = (requiredWeightedFinalScore / finalWeight);
+
+            // 4. Output Logic
+            let message = '';
+            
+            if (requiredScore < 0) {
+                // Already achieved the target grade or the remaining weight is too small
+                message = `<span style="color: green;">Congratulations! You only need a **0%** on the final to achieve your target grade of ${targetGrade}%.</span>`;
+            } else if (requiredScore > 100) {
+                // Mathematically impossible
+                message = `<span style="color: red;">Unfortunately, you need **${requiredScore.toFixed(2)}%** on the final, which is impossible (over 100%). Your maximum possible grade is **${(weightedCurrentScore + finalWeight) / totalCourseWeight * 100.0}**.</span>`;
+            } else {
+                // Possible score
+                message = `To achieve a **${targetGrade}%** overall grade, you must score at least: <br>
+                           <strong style="font-size: 1.5em; color: green;">${requiredScore.toFixed(2)}%</strong> on the Final Exam/Project.`;
+            }
+            
+            // Add current standing for context
+            message += `<br><br> (Current Weighted Score: ${weightedCurrentScore.toFixed(2)} out of ${totalCurrentWeight.toFixed(2)} possible points.)`;
+
+            resultOutput.innerHTML = message;
+        }
+
+        // Initialize with a few default inputs on load
+        document.addEventListener('DOMContentLoaded', () => {
+            addGradeInput('Midterm', 85, 20);
+            addGradeInput('Quizzes', 95, 20);
+            addGradeInput('Homework', 100, 10);
+        });
+    </script>
+
+</body>
+</html>
