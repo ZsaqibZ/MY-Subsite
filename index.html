@@ -148,20 +148,37 @@
             background: linear-gradient(135deg, #5c8fd6, #42a5f5);
         }
 
-        /* Tool Showcase */
-        .tool-showcase h2 {
-            font-size: 2rem;
-            font-weight: 600;
-            color: #42a5f5;
-            margin-bottom: 2rem;
-            text-align: center;
+        /* Category Section */
+        .category-section {
+            margin: 3rem 0;
         }
 
-        .tool-grid {
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: linear-gradient(135deg, #2b2b2b, #3a3a3a);
+            border-radius: 12px;
+            border-left: 4px solid #42a5f5;
+        }
+
+        .category-header h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #90caf9;
+            margin: 0;
+        }
+
+        .category-icon {
+            font-size: 2rem;
+        }
+
+        .tools-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin-top: 2rem;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.2rem;
         }
 
         .tool-card {
@@ -172,6 +189,8 @@
             transition: transform 0.25s ease, box-shadow 0.25s ease;
             display: flex;
             flex-direction: column;
+            text-decoration: none;
+            color: #e0e0e0;
         }
 
         .tool-card:hover {
@@ -180,125 +199,29 @@
         }
 
         .tool-card h3 {
-            font-size: 1.4rem;
-            font-weight: 600;
-            color: #90caf9;
-            margin: 0 0 1rem;
-        }
-
-        .tool-card p {
-            font-size: 1rem;
-            color: #ddd;
-            margin: 0 0 1rem;
-            flex-grow: 1;
-        }
-
-        .category {
-            display: inline-block;
-            background-color: rgba(66, 165, 245, 0.15);
-            color: #42a5f5;
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-        }
-
-        .tool-link {
-            display: inline-block;
-            background: linear-gradient(135deg, #e57399, #d16587);
-            color: white;
-            padding: 0.7rem 1.5rem;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-
-        .tool-link:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(229, 115, 153, 0.4);
-            background: linear-gradient(135deg, #d16587, #e57399);
-        }
-
-        /* Categories Section */
-        #categories h2 {
-            font-size: 2rem;
-            font-weight: 600;
-            color: #42a5f5;
-            margin-bottom: 2rem;
-            text-align: center;
-        }
-
-        #categories h3 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #90caf9;
-            margin-top: 2rem;
-            margin-bottom: 1rem;
-        }
-
-        .category-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 3rem;
-        }
-
-        .category-item {
-            background: linear-gradient(135deg, #2b2b2b, #3a3a3a);
-            border-radius: 12px;
-            padding: 1.5rem;
-            text-decoration: none;
-            color: #e0e0e0;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-            transition: transform 0.25s ease, box-shadow 0.25s ease;
-            display: block;
-        }
-
-        .category-item:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
-        }
-
-        .category-item h3 {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             font-weight: 600;
             color: #90caf9;
             margin: 0 0 0.5rem;
         }
 
-        .category-item p {
+        .tool-card p {
             font-size: 0.95rem;
             color: #ddd;
             margin: 0;
+            flex-grow: 1;
         }
 
-        #categories ul {
-            list-style: none;
-            padding: 0;
-            margin: 0 0 2rem;
-        }
-
-        #categories ul li {
-            margin: 0.8rem 0;
-        }
-
-        #categories ul li a {
-            color: #e0e0e0;
-            text-decoration: none;
-            padding: 0.5rem 1rem;
+        .tool-badge {
             display: inline-block;
-            border-radius: 6px;
-            background-color: rgba(40, 40, 40, 0.6);
-            transition: all 0.3s ease;
-        }
-
-        #categories ul li a:hover {
             background-color: rgba(66, 165, 245, 0.15);
             color: #42a5f5;
-            transform: translateX(5px);
+            padding: 0.3rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: 0.8rem;
+            align-self: flex-start;
         }
 
         /* Footer */
@@ -332,6 +255,32 @@
             color: #e57399;
         }
 
+        /* Quick Stats */
+        .stats-section {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            flex-wrap: wrap;
+            padding: 2rem 0;
+            margin: 2rem 0;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: #42a5f5;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            color: #aaaaaa;
+        }
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .container {
@@ -358,8 +307,7 @@
                 font-size: 1.1rem;
             }
 
-            .tool-grid,
-            .category-list {
+            .tools-grid {
                 grid-template-columns: 1fr;
             }
 
@@ -368,16 +316,20 @@
                 font-size: 1rem;
             }
 
-            .tool-card h3 {
-                font-size: 1.2rem;
-            }
-
-            #categories h2 {
-                font-size: 1.7rem;
+            .category-header h2 {
+                font-size: 1.5rem;
             }
 
             .value-prop ul {
                 padding: 0 1rem;
+            }
+
+            .stats-section {
+                gap: 2rem;
+            }
+
+            .stat-number {
+                font-size: 2rem;
             }
         }
 
@@ -406,9 +358,13 @@
                 padding: 1.2rem;
             }
 
-            .download-link {
-                padding: 0.6rem 1.2rem;
-                font-size: 0.95rem;
+            .category-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .category-header h2 {
+                font-size: 1.3rem;
             }
         }
     </style>
@@ -427,79 +383,194 @@
         <section id="hero" class="value-prop">
             <h2>Solve Your Stuck Moments Faster.</h2>
             <p>Simple, online tools designed to cut through complexity in academics, development, and DIY projects. <strong>Access the exact solution you need—right in your browser.</strong></p>
-            <a href="#featured-tools" class="cta-button">See Featured Tools</a>
+            <a href="#all-tools" class="cta-button">Browse All Tools</a>
         </section>
 
-        <hr>
-
-        <section id="featured-tools" class="tool-showcase">
-            <h2>⭐ Featured Tools</h2>
-            <div class="tool-grid">
-                
-                <article class="tool-card">
-                    <h3>Equation Simplifier v1.0</h3>
-                    <p>Instantly simplifies complex algebraic and trigonometric expressions. Built to handle specific forms that standard calculators struggle with.</p>
-                    <span class="category">Academic & Math</span>
-                    <a href="tools/equation-simplifier.html" class="tool-link">Open Tool</a>
-                </article>
-
-                <article class="tool-card">
-                    <h3>Bulk File Renamer</h3>
-                    <p>Rename hundreds of files in a folder based on custom patterns (dates, sequences, prefixes) with a simple GUI.</p>
-                    <span class="category">Utility & Data</span>
-                    <a href="tools/file-renamer.html" class="tool-link">Open Tool</a>
-                </article>
-
-                <article class="tool-card">
-                    <h3>Hyper-Custom Pomodoro</h3>
-                    <p>Set non-standard work/break cycles (e.g., 52 min work / 17 min break) to optimize deep work sessions.</p>
-                    <span class="category">Productivity</span>
-                    <a href="tools/pomodoro-timer.html" class="tool-link">Open Tool</a>
-                </article>
-
+        <div class="stats-section">
+            <div class="stat-item">
+                <span class="stat-number" id="toolCount">24</span>
+                <span class="stat-label">Tools Available</span>
             </div>
-        </section>
-
-        <hr>
-
-        <section id="categories">
-            <h2>Browse All 100+ Tools by Category</h2>
-            <div class="category-list">
-                
-                <a href="#academic" class="category-item">
-                    <h3>➗ Academic & STEM</h3>
-                    <p>Math, Science, and Study Help (e.g., Unit Converters)</p>
-                </a>
-                
-                <a href="#dev" class="category-item">
-                    <h3>💻 Utility & Dev</h3>
-                    <p>Coding, Data Handling, and Formatting (e.g., JSON Validation)</p>
-                </a>
-                
-                <a href="#writing" class="category-item">
-                    <h3>✍️ Writing & Content</h3>
-                    <p>Grammar, Structure, and Creative Inspiration</p>
-                </a>
-
+            <div class="stat-item">
+                <span class="stat-number">4</span>
+                <span class="stat-label">Categories</span>
             </div>
-            
-            <h3 id="academic">Academic & STEM Tools</h3>
-            <ul>
-                <li><a href="tools/unit-converter.html">Unit Converter (Scientific)</a></li>
-                <li><a href="tools/grade-predictor.html">Grade Predictor</a></li>
-            </ul>
-
-            <h3 id="dev">Utility & Dev Tools</h3>
-            <ul>
-                <li><a href="tools/json-validator.html">JSON Formatter & Validator</a></li>
-                <li><a href="tools/regex-tester.html">Online Regex Tester</a></li>
-            </ul>
-            
-        </section>
+            <div class="stat-item">
+                <span class="stat-number">100%</span>
+                <span class="stat-label">Free to Use</span>
+            </div>
+        </div>
 
         <hr>
 
-        <section id="offline-value" class="value-prop">
+        <div id="all-tools">
+            
+            <!-- FINANCE & PRODUCTIVITY TOOLS -->
+            <section class="category-section">
+                <div class="category-header">
+                    <span class="category-icon">💰</span>
+                    <h2>Finance & Productivity Tools</h2>
+                </div>
+                <div class="tools-grid">
+                    <a href="finance and productivity tools/budget calculator.html" class="tool-card">
+                        <h3>Budget Calculator</h3>
+                        <p>Plan and track your monthly expenses with ease.</p>
+                        <span class="tool-badge">Finance</span>
+                    </a>
+                    <a href="finance and productivity tools/compound interest predictor.html" class="tool-card">
+                        <h3>Compound Interest Predictor</h3>
+                        <p>Calculate your investment growth over time.</p>
+                        <span class="tool-badge">Finance</span>
+                    </a>
+                    <a href="finance and productivity tools/loan repayment calculator.html" class="tool-card">
+                        <h3>Loan Repayment Calculator</h3>
+                        <p>Determine your monthly loan payments and schedules.</p>
+                        <span class="tool-badge">Finance</span>
+                    </a>
+                    <a href="finance and productivity tools/should I buy claculator.html" class="tool-card">
+                        <h3>Should I Buy Calculator</h3>
+                        <p>Make informed purchase decisions based on value analysis.</p>
+                        <span class="tool-badge">Finance</span>
+                    </a>
+                    <a href="finance and productivity tools/Task Prioritizer.html" class="tool-card">
+                        <h3>Task Prioritizer</h3>
+                        <p>Organize and prioritize your tasks effectively.</p>
+                        <span class="tool-badge">Productivity</span>
+                    </a>
+                </div>
+            </section>
+
+            <hr>
+
+            <!-- PROGRAMMING & DEV TOOLS -->
+            <section class="category-section">
+                <div class="category-header">
+                    <span class="category-icon">💻</span>
+                    <h2>Programming & Dev Tools</h2>
+                </div>
+                <div class="tools-grid">
+                    <a href="Programming and dev tools/code snippet manager.html" class="tool-card">
+                        <h3>Code Snippet Manager</h3>
+                        <p>Save and organize your frequently used code snippets.</p>
+                        <span class="tool-badge">Development</span>
+                    </a>
+                    <a href="Programming and dev tools/color code converter.html" class="tool-card">
+                        <h3>Color Code Converter</h3>
+                        <p>Convert between HEX, RGB, HSL, and other color formats.</p>
+                        <span class="tool-badge">Development</span>
+                    </a>
+                    <a href="Programming and dev tools/json-xml formatter.html" class="tool-card">
+                        <h3>JSON-XML Formatter</h3>
+                        <p>Format and validate JSON and XML data instantly.</p>
+                        <span class="tool-badge">Development</span>
+                    </a>
+                    <a href="Programming and dev tools/Password strength analyzer.html" class="tool-card">
+                        <h3>Password Strength Analyzer</h3>
+                        <p>Check the strength and security of your passwords.</p>
+                        <span class="tool-badge">Security</span>
+                    </a>
+                    <a href="Programming and dev tools/Regex Tester.html" class="tool-card">
+                        <h3>Regex Tester</h3>
+                        <p>Test and debug your regular expressions in real-time.</p>
+                        <span class="tool-badge">Development</span>
+                    </a>
+                    <a href="Programming and dev tools/string utility.html" class="tool-card">
+                        <h3>String Utility</h3>
+                        <p>Perform various string operations and transformations.</p>
+                        <span class="tool-badge">Development</span>
+                    </a>
+                    <a href="Programming and dev tools/url encoder decoder.html" class="tool-card">
+                        <h3>URL Encoder/Decoder</h3>
+                        <p>Encode and decode URLs for safe transmission.</p>
+                        <span class="tool-badge">Development</span>
+                    </a>
+                </div>
+            </section>
+
+            <hr>
+
+            <!-- STEM & ACADEMIC TOOLS -->
+            <section class="category-section">
+                <div class="category-header">
+                    <span class="category-icon">📚</span>
+                    <h2>STEM & Academic Tools</h2>
+                </div>
+                <div class="tools-grid">
+                    <a href="Stem and Academic/citation-formater.html" class="tool-card">
+                        <h3>Citation Formatter</h3>
+                        <p>Generate citations in APA, MLA, Chicago, and more.</p>
+                        <span class="tool-badge">Academic</span>
+                    </a>
+                    <a href="Stem and Academic/flashcard generator.html" class="tool-card">
+                        <h3>Flashcard Generator</h3>
+                        <p>Create custom flashcards for effective studying.</p>
+                        <span class="tool-badge">Academic</span>
+                    </a>
+                    <a href="Stem and Academic/grade predictor.html" class="tool-card">
+                        <h3>Grade Predictor</h3>
+                        <p>Predict your final grade based on current performance.</p>
+                        <span class="tool-badge">Academic</span>
+                    </a>
+                    <a href="Stem and Academic/study-schedule-generator.html" class="tool-card">
+                        <h3>Study Schedule Generator</h3>
+                        <p>Create optimized study schedules for exams.</p>
+                        <span class="tool-badge">Academic</span>
+                    </a>
+                    <a href="Stem and Academic/text summarizer.html" class="tool-card">
+                        <h3>Text Summarizer</h3>
+                        <p>Summarize long texts into key points quickly.</p>
+                        <span class="tool-badge">Academic</span>
+                    </a>
+                    <a href="Stem and Academic/unit-converter.html" class="tool-card">
+                        <h3>Unit Converter</h3>
+                        <p>Convert between various units of measurement.</p>
+                        <span class="tool-badge">STEM</span>
+                    </a>
+                </div>
+            </section>
+
+            <hr>
+
+            <!-- WRITING & CONTENT TOOLS -->
+            <section class="category-section">
+                <div class="category-header">
+                    <span class="category-icon">✍️</span>
+                    <h2>Writing & Content Tools</h2>
+                </div>
+                <div class="tools-grid">
+                    <a href="writing and content tools/dialogue pace analyzer.html" class="tool-card">
+                        <h3>Dialogue Pace Analyzer</h3>
+                        <p>Analyze the pacing and flow of your dialogues.</p>
+                        <span class="tool-badge">Writing</span>
+                    </a>
+                    <a href="writing and content tools/headline generator.html" class="tool-card">
+                        <h3>Headline Generator</h3>
+                        <p>Generate catchy headlines for your content.</p>
+                        <span class="tool-badge">Content</span>
+                    </a>
+                    <a href="writing and content tools/passive voice checker.html" class="tool-card">
+                        <h3>Passive Voice Checker</h3>
+                        <p>Identify and improve passive voice in your writing.</p>
+                        <span class="tool-badge">Writing</span>
+                    </a>
+                    <a href="writing and content tools/sentence variety analyzer.html" class="tool-card">
+                        <h3>Sentence Variety Analyzer</h3>
+                        <p>Improve your writing with better sentence structure.</p>
+                        <span class="tool-badge">Writing</span>
+                    </a>
+                    <a href="writing and content tools/word count tracker.html" class="tool-card">
+                        <h3>Word Count Tracker</h3>
+                        <p>Track word count, characters, and reading time.</p>
+                        <span class="tool-badge">Writing</span>
+                    </a>
+                </div>
+            </section>
+
+        </div>
+
+        <hr>
+
+        <section id="features" class="value-prop">
             <h2>Why Choose Our Online Tools?</h2>
             <ul>
                 <li>🚀 <strong>Instant Access:</strong> No downloads required. Open any tool directly in your browser.</li>
@@ -520,6 +591,17 @@
             </nav>
         </div>
     </footer>
+
+    <script>
+        // Auto-count tools on page
+        document.addEventListener('DOMContentLoaded', function() {
+            const toolCards = document.querySelectorAll('.tool-card');
+            const toolCount = document.getElementById('toolCount');
+            if (toolCount) {
+                toolCount.textContent = toolCards.length;
+            }
+        });
+    </script>
 
 </body>
 </html>
