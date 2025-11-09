@@ -3,115 +3,175 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EngiSimulation Tools | Online Engineering Utilities</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <title>EngiSimulation Tools | Free Online Engineering Utilities & Calculators</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="EngiSimulation.avif" />
     
-    <meta name="description" content="Access free online engineering tools and utilities from EngiSimulation. Solve problems faster with browser-based applications."/>
-    <meta name="keywords" content="Engineering Tools, Online Tools, MATLAB Tools, Engineering Utilities, Problem Solvers, Browser Tools" />
+    <meta name="description" content="Access 29+ free online engineering tools and utilities from EngiSimulation. Budget calculators, code formatters, grade predictors, design tools, and more. No installation required."/>
+    <meta name="keywords" content="engineering tools, online calculators, budget calculator, compound interest calculator, loan calculator, code snippet manager, color converter, JSON formatter, XML formatter, regex tester, password strength checker, URL encoder, citation formatter, flashcard generator, grade predictor, study schedule, unit converter, text summarizer, word count, passive voice checker, headline generator, color palette generator, golden ratio calculator, icon generator, mood board creator, productivity tools, academic tools, programming tools, design tools, free online tools, browser-based tools, web utilities" />
+    <meta name="author" content="Saqib Hussain - EngiSimulation" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="EngiSimulation Tools - Free Online Engineering Utilities" />
+    <meta property="og:description" content="29+ free browser-based tools for finance, programming, academics, writing, and design. No downloads required." />
+    <meta property="og:image" content="https://tools.engisimulation.com/EngiSimulation.avif" />
+    <meta property="og:type" content="website" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="EngiSimulation Tools - Free Online Utilities" />
+    <meta name="twitter:description" content="Access 29+ free engineering and productivity tools right in your browser." />
     
     <style>
+        :root {
+            --color-bg: #111317;
+            --color-surface: #1c1f26;
+            --color-surface-alt: #21252d;
+            --color-primary: #4aa8ff;
+            --color-primary-dark: #1d6fd8;
+            --color-primary-soft: rgba(74, 168, 255, 0.16);
+            --color-accent: #ff6f91;
+            --color-text: #e8ecf5;
+            --color-text-muted: #a8b2c6;
+            --color-border: rgba(148, 170, 204, 0.14);
+            --shadow-sm: 0 8px 24px rgba(8, 10, 15, 0.35);
+            --shadow-lg: 0 24px 48px rgba(8, 10, 15, 0.45);
+            --transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
         * {
             box-sizing: border-box;
         }
 
         html {
-            background-color: #1a1a1a;
+            background-color: var(--color-bg);
             scroll-behavior: smooth;
         }
-        
+
         ::-webkit-scrollbar {
             width: 8px;
         }
 
         ::-webkit-scrollbar-track {
-            background: #1a1a1a;
+            background: var(--color-bg);
         }
 
         ::-webkit-scrollbar-thumb {
-            background-color: #444;
-            border-radius: 10px;
-            border: 2px solid #1a1a1a;
+            background-color: var(--color-surface-alt);
+            border-radius: 12px;
+            border: 2px solid var(--color-bg);
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background-color: #666;
+            background-color: #313646;
         }
 
         body {
-            overflow-x: hidden;
             margin: 0;
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #1a1a1a, #2e2e2e);
-            color: #e0e0e0;
-            line-height: 1.6;
+            overflow-x: hidden;
+            background: radial-gradient(circle at top, rgba(74, 168, 255, 0.12), transparent 45%),
+                        radial-gradient(circle at bottom, rgba(255, 111, 145, 0.08), transparent 40%),
+                        linear-gradient(140deg, #0c0d10 0%, #161920 35%, #12151b 100%);
+            color: var(--color-text);
+            line-height: 1.65;
         }
 
         header {
-            background: #1a1a1a;
-            padding: 1.5rem 1.2rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(12, 14, 18, 0.84);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid rgba(148, 170, 204, 0.12);
+        }
+
+        .announcement-bar {
             text-align: center;
+            padding: 0.55rem 1rem;
+            font-size: 0.9rem;
+            color: var(--color-text-muted);
+            background: rgba(31, 35, 45, 0.65);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .announcement-bar span {
+            color: var(--color-primary);
+            font-weight: 600;
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1.1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
         }
 
         header h1 {
-            font-size: 2rem;
+            margin: 0;
+            color: var(--color-text);
             font-weight: 600;
-            color: #42a5f5;
-            margin: 0 0 0.5rem;
+            font-size: 1.8rem;
+            letter-spacing: 0.01em;
         }
 
         header h1 a {
-            color: #42a5f5;
+            color: var(--color-text);
             text-decoration: none;
             transition: color 0.3s ease;
         }
 
         header h1 a:hover {
-            color: #90caf9;
+            color: var(--color-primary);
         }
 
         .subtitle {
-            font-size: 1.1rem;
-            color: #aaaaaa;
-            margin: 0;
+            font-size: 1rem;
+            color: var(--color-text-muted);
+            margin: 0.3rem 0 0;
+            text-align: center;
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 0 2rem;
+            padding: 0 1.5rem;
         }
 
         main {
-            padding: 3rem 2rem;
+            padding: 3rem 1.5rem;
         }
 
         hr {
             border: none;
-            border-top: 1px solid #444;
+            border-top: 1px solid var(--color-border);
             margin: 3rem 0;
         }
 
         /* Hero Section */
         .value-prop {
             text-align: center;
-            padding: 2rem 0;
+            padding: 2.5rem 0;
         }
 
         .value-prop h2 {
-            font-size: 2.2rem;
-            font-weight: 600;
-            color: #42a5f5;
+            font-size: clamp(2rem, 4vw, 2.6rem);
+            font-weight: 700;
+            color: var(--color-text);
             margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
         }
 
         .value-prop p {
-            font-size: 1.2rem;
-            color: #e0e0e0;
+            font-size: 1.15rem;
+            color: var(--color-text-muted);
             max-width: 800px;
             margin: 0 auto 2rem;
-            line-height: 1.6;
+            line-height: 1.65;
         }
 
         .value-prop ul {
@@ -123,29 +183,64 @@
         }
 
         .value-prop ul li {
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             margin: 1rem 0;
             padding-left: 0;
+            color: var(--color-text-muted);
         }
 
         /* CTA Button */
         .cta-button {
-            display: inline-block;
-            background: linear-gradient(135deg, #42a5f5, #5c8fd6);
-            color: white;
-            padding: 1rem 2rem;
-            border-radius: 8px;
-            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.8rem 1.8rem;
+            border-radius: 999px;
+            background: linear-gradient(120deg, rgba(74, 168, 255, 0.18), rgba(74, 168, 255, 0.08));
+            border: 1px solid rgba(74, 168, 255, 0.4);
+            color: var(--color-text);
             font-weight: 600;
-            font-size: 1.1rem;
-            box-shadow: 0 4px 12px rgba(66, 165, 245, 0.3);
-            transition: all 0.3s ease;
+            font-size: 1.05rem;
+            text-decoration: none;
+            transition: var(--transition);
+            box-shadow: 0 8px 20px rgba(26, 122, 255, 0.22);
         }
 
         .cta-button:hover {
+            background: linear-gradient(120deg, rgba(74, 168, 255, 0.3), rgba(74, 168, 255, 0.1));
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(66, 165, 245, 0.5);
-            background: linear-gradient(135deg, #5c8fd6, #42a5f5);
+            box-shadow: 0 12px 28px rgba(26, 122, 255, 0.35);
+        }
+
+        /* Stats Section */
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.2rem;
+            padding: 0 0 2rem;
+            margin: 2rem 0;
+        }
+
+        .stat-item {
+            padding: 1.6rem;
+            border-radius: 18px;
+            background: rgba(25, 30, 40, 0.9);
+            border: 1px solid rgba(148, 170, 204, 0.18);
+            box-shadow: var(--shadow-sm);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.3rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.95rem;
+            color: var(--color-text-muted);
+            margin-top: 0.4rem;
         }
 
         /* Category Section */
@@ -158,17 +253,20 @@
             align-items: center;
             gap: 1rem;
             margin-bottom: 1.5rem;
-            padding: 1rem;
-            background: linear-gradient(135deg, #2b2b2b, #3a3a3a);
-            border-radius: 12px;
-            border-left: 4px solid #42a5f5;
+            padding: 1.2rem 1.5rem;
+            background: linear-gradient(165deg, rgba(29, 33, 44, 0.96), rgba(19, 21, 28, 0.94));
+            border-radius: 16px;
+            border-left: 4px solid var(--color-primary);
+            border: 1px solid rgba(148, 170, 204, 0.16);
+            box-shadow: var(--shadow-sm);
         }
 
         .category-header h2 {
-            font-size: 1.8rem;
+            font-size: 1.7rem;
             font-weight: 600;
-            color: #90caf9;
+            color: var(--color-primary);
             margin: 0;
+            letter-spacing: 0.01em;
         }
 
         .category-icon {
@@ -178,65 +276,87 @@
         .tools-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 1.2rem;
+            gap: 1.4rem;
         }
 
         .tool-card {
-            background: linear-gradient(135deg, #2b2b2b, #3a3a3a);
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            background: linear-gradient(165deg, rgba(29, 33, 44, 0.96), rgba(19, 21, 28, 0.94));
+            border-radius: 16px;
+            padding: 1.6rem;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
             display: flex;
             flex-direction: column;
             text-decoration: none;
-            color: #e0e0e0;
+            color: var(--color-text);
+            border: 1px solid rgba(148, 170, 204, 0.16);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tool-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at top right, rgba(74, 168, 255, 0.14), transparent 58%);
+            opacity: 0;
+            transition: var(--transition);
+            pointer-events: none;
+        }
+
+        .tool-card:hover::before {
+            opacity: 1;
         }
 
         .tool-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+            transform: translateY(-8px);
+            box-shadow: 0 26px 48px rgba(7, 12, 22, 0.5);
+            border-color: rgba(74, 168, 255, 0.45);
         }
 
         .tool-card h3 {
-            font-size: 1.2rem;
+            font-size: 1.25rem;
             font-weight: 600;
-            color: #90caf9;
-            margin: 0 0 0.5rem;
+            color: var(--color-primary);
+            margin: 0 0 0.6rem;
+            letter-spacing: 0.01em;
         }
 
         .tool-card p {
             font-size: 0.95rem;
-            color: #ddd;
+            color: var(--color-text-muted);
             margin: 0;
             flex-grow: 1;
+            line-height: 1.6;
         }
 
         .tool-badge {
             display: inline-block;
-            background-color: rgba(66, 165, 245, 0.15);
-            color: #42a5f5;
-            padding: 0.3rem 0.6rem;
-            border-radius: 6px;
+            background-color: rgba(74, 168, 255, 0.15);
+            color: var(--color-primary);
+            padding: 0.35rem 0.7rem;
+            border-radius: 8px;
             font-size: 0.75rem;
             font-weight: 600;
-            margin-top: 0.8rem;
+            margin-top: 1rem;
             align-self: flex-start;
+            border: 1px solid rgba(74, 168, 255, 0.25);
         }
 
         /* Footer */
         footer {
-            text-align: center;
-            background: #1f1f1f;
-            color: #aaaaaa;
-            padding: 2rem 1rem;
-            font-size: 0.9rem;
-            box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.3);
             margin-top: 3rem;
+            background: rgba(13, 15, 21, 0.95);
+            border-top: 1px solid rgba(148, 170, 204, 0.12);
+            text-align: center;
+            color: var(--color-text-muted);
+            padding: 1.8rem 1.2rem 2rem;
+            font-size: 0.92rem;
         }
 
         footer p {
             margin: 0.5rem 0;
+            color: var(--color-text);
         }
 
         footer nav {
@@ -244,41 +364,21 @@
         }
 
         footer nav a {
-            color: #42a5f5;
+            color: var(--color-primary);
             text-decoration: none;
             margin: 0 0.5rem;
             font-weight: 500;
-            transition: color 0.3s ease;
+            letter-spacing: 0.01em;
+            transition: var(--transition);
         }
 
         footer nav a:hover {
-            color: #e57399;
+            color: var(--color-accent);
         }
 
-        /* Quick Stats */
-        .stats-section {
-            display: flex;
-            justify-content: center;
-            gap: 3rem;
-            flex-wrap: wrap;
-            padding: 2rem 0;
-            margin: 2rem 0;
-        }
-
-        .stat-item {
-            text-align: center;
-        }
-
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: 600;
-            color: #42a5f5;
-            display: block;
-        }
-
-        .stat-label {
-            font-size: 1rem;
-            color: #aaaaaa;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         /* Responsive Design */
@@ -292,11 +392,11 @@
             }
 
             header h1 {
-                font-size: 1.6rem;
+                font-size: 1.5rem;
             }
 
             .subtitle {
-                font-size: 1rem;
+                font-size: 0.9rem;
             }
 
             .value-prop h2 {
@@ -304,7 +404,7 @@
             }
 
             .value-prop p {
-                font-size: 1.1rem;
+                font-size: 1.05rem;
             }
 
             .tools-grid {
@@ -312,12 +412,16 @@
             }
 
             .cta-button {
-                padding: 0.8rem 1.5rem;
+                padding: 0.7rem 1.5rem;
                 font-size: 1rem;
             }
 
+            .category-header {
+                padding: 1rem;
+            }
+
             .category-header h2 {
-                font-size: 1.5rem;
+                font-size: 1.4rem;
             }
 
             .value-prop ul {
@@ -325,7 +429,7 @@
             }
 
             .stats-section {
-                gap: 2rem;
+                gap: 1rem;
             }
 
             .stat-number {
@@ -335,19 +439,19 @@
 
         @media (max-width: 480px) {
             header {
-                padding: 1rem;
+                padding: 0;
             }
 
             header h1 {
-                font-size: 1.4rem;
+                font-size: 1.3rem;
             }
 
             .subtitle {
-                font-size: 0.9rem;
+                font-size: 0.85rem;
             }
 
             .value-prop h2 {
-                font-size: 1.5rem;
+                font-size: 1.6rem;
             }
 
             .value-prop p {
@@ -355,16 +459,21 @@
             }
 
             .tool-card {
-                padding: 1.2rem;
+                padding: 1.3rem;
             }
 
             .category-header {
                 flex-direction: column;
                 text-align: center;
+                padding: 1rem;
             }
 
             .category-header h2 {
                 font-size: 1.3rem;
+            }
+
+            .announcement-bar {
+                font-size: 0.82rem;
             }
         }
     </style>
@@ -372,27 +481,32 @@
 <body>
 
     <header>
-        <div class="container">
-            <h1><a href="/">🛠️ EngiSimulation Tools</a></h1>
-            <p class="subtitle">Your Online Toolkit for Engineering Problems.</p>
+        <div class="announcement-bar">
+            <span>New:</span> 29+ free online tools for engineering, finance, coding, and design.
+        </div>
+        <div class="header-container">
+            <div>
+                <h1><a href="/">🛠️ EngiSimulation Tools</a></h1>
+                <p class="subtitle">Your Online Toolkit for Engineering Problems</p>
+            </div>
         </div>
     </header>
 
     <main class="container">
 
         <section id="hero" class="value-prop">
-            <h2>Solve Your Stuck Moments Faster.</h2>
+            <h2>Solve Your Stuck Moments <span style="color: var(--color-primary);">Faster</span></h2>
             <p>Simple, online tools designed to cut through complexity in academics, development, and DIY projects. <strong>Access the exact solution you need—right in your browser.</strong></p>
-            <a href="#all-tools" class="cta-button">Browse All Tools</a>
+            <a href="#all-tools" class="cta-button">Browse All Tools →</a>
         </section>
 
         <div class="stats-section">
             <div class="stat-item">
-                <span class="stat-number" id="toolCount">24</span>
+                <span class="stat-number" id="toolCount">29</span>
                 <span class="stat-label">Tools Available</span>
             </div>
             <div class="stat-item">
-                <span class="stat-number">4</span>
+                <span class="stat-number">5</span>
                 <span class="stat-label">Categories</span>
             </div>
             <div class="stat-item">
@@ -566,6 +680,8 @@
                 </div>
             </section>
 
+            <hr>
+
             <!-- DESIGN & CREATIVITY TOOLS -->
             <section class="category-section">
                 <div class="category-header">
@@ -606,7 +722,7 @@
         <hr>
 
         <section id="features" class="value-prop">
-            <h2>Why Choose Our Online Tools?</h2>
+            <h2>Why Choose Our <span style="color: var(--color-primary);">Online Tools</span>?</h2>
             <ul>
                 <li>🚀 <strong>Instant Access:</strong> No downloads required. Open any tool directly in your browser.</li>
                 <li>🔒 <strong>Maximum Privacy:</strong> All processing happens in your browser. Your data never leaves your device.</li>
