@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Golden Ratio Calculator — golden-ratio.html</title>
+  <style>
+    :root{
+      --bg:#0f1724; --card:#0b1220; --muted:#94a3b8; --accent:#f59e0b; --glass: rgba(255,255,255,0.04);
+      --radius:12px; --maxw:820px; --gap:18px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,#071022 0%, #071225 60%);color:#e6eef6}
+    .wrap{max-width:var(--maxw);margin:40px auto;padding:28px;}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:var(--radius);padding:18px;box-shadow:0 6px 24px rgba(2,6,23,0.6);}
+    header{display:flex;gap:12px;align-items:center}
+    .logo{width:56px;height:56px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#f97316);display:flex;align-items:center;justify-content:center;font-weight:700;color:#072033}
+    h1{margin:0;font-size:20px}
+    p.lead{margin:6px 0 0;color:var(--muted);font-size:13px}
+
+    .grid{display:grid;grid-template-columns:1fr 360px;gap:var(--gap);margin-top:18px}
+    .panel{padding:16px;border-radius:10px;background:var(--card);}
+    label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+    input[type=number], select{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit;font-size:15px}
+    .row{display:flex;gap:12px}
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;border:none;cursor:pointer;font-weight:600}
+    .btn-primary{background:var(--accent);color:#072033}
+    .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted)}
+    .result{display:flex;flex-direction:column;gap:10px}
+    .res-item{background:var(--glass);padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.03)}
+    .muted{color:var(--muted);font-size:13px}
+    .preview{height:220px;border-radius:8px;background:linear-gradient(135deg, rgba(245,158,11,0.12), rgba(4,6,10,0.2));display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+    .shape{position:absolute;display:flex;align-items:center;justify-content:center;color:#072033;font-weight:700;border-radius:6px;padding:6px}
+    .controls{display:flex;gap:8px;flex-wrap:wrap}
+    footer{margin-top:14px;color:var(--muted);font-size:13px}
+    @media (max-width:900px){.grid{grid-template-columns:1fr;}.preview{height:160px}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <header>
+        <div class="logo">φ</div>
+        <div>
+          <h1>Golden Ratio Calculator</h1>
+          <p class="lead">Design-friendly calculator for producing golden-ratio based dimensions, guides and a live preview.</p>
+        </div>
+      </header>
+
+      <div class="grid">
+        <section class="panel">
+          <label for="base">Base dimension (px)</label>
+          <input id="base" type="number" min="1" value="500" />
+
+          <div style="height:10px"></div>
+          <label for="direction">Orientation</label>
+          <select id="direction">
+            <option value="horizontal">Horizontal (width → height)</option>
+            <option value="vertical">Vertical (height → width)</option>
+          </select>
+
+          <div style="height:10px"></div>
+          <label>Preset scales</label>
+          <div class="controls">
+            <button class="btn btn-ghost" data-scale="0.618">0.618 (φ⁻¹)</button>
+            <button class="btn btn-ghost" data-scale="1">1x</button>
+            <button class="btn btn-ghost" data-scale="1.618">1.618 (φ)</button>
+            <button class="btn btn-ghost" id="fitScreen">Fit to screen</button>
+          </div>
+
+          <div style="height:10px"></div>
+          <label>Options</label>
+          <div class="controls">
+            <label class="muted"><input type="checkbox" id="showGuides" checked/> Show guides</label>
+            <label class="muted"><input type="checkbox" id="lockToInt"/> Lock to integers</label>
+          </div>
+
+          <div style="height:14px"></div>
+          <div class="row">
+            <button id="calcBtn" class="btn btn-primary">Calculate</button>
+            <button id="copyBtn" class="btn btn-ghost">Copy results</button>
+            <button id="exportBtn" class="btn btn-ghost">Export CSV</button>
+          </div>
+
+          <footer>
+            <div>Formula: (a + b) / a = a / b = φ ≈ 1.618</div>
+          </footer>
+        </section>
+
+        <aside class="panel">
+          <div class="result">
+            <div class="res-item">
+              <div class="muted">Calculated pair (a & b)</div>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+                <div>
+                  <div id="aVal" style="font-weight:700;font-size:18px">—</div>
+                  <div class="muted">a</div>
+                </div>
+                <div>
+                  <div id="bVal" style="font-weight:700;font-size:18px">—</div>
+                  <div class="muted">b</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="res-item">
+              <div class="muted">Ratio (a / b)</div>
+              <div id="ratio" style="font-weight:700;font-size:18px;margin-top:8px">—</div>
+            </div>
+
+            <div class="res-item">
+              <div class="muted">Notes</div>
+              <div id="notes" style="margin-top:8px;font-size:13px;line-height:1.4">Use these values to size design elements; click copy to put them on your clipboard.</div>
+            </div>
+
+            <div style="height:8px"></div>
+            <div class="preview" id="preview">
+              <svg id="svgPreview" width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"></svg>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Golden ratio utility
+    const PHI = (1 + Math.sqrt(5)) / 2; // ≈1.618
+
+    const baseInput = document.getElementById('base');
+    const direction = document.getElementById('direction');
+    const calcBtn = document.getElementById('calcBtn');
+    const aVal = document.getElementById('aVal');
+    const bVal = document.getElementById('bVal');
+    const ratioEl = document.getElementById('ratio');
+    const notes = document.getElementById('notes');
+    const preview = document.getElementById('svgPreview');
+    const copyBtn = document.getElementById('copyBtn');
+    const exportBtn = document.getElementById('exportBtn');
+    const showGuides = document.getElementById('showGuides');
+    const lockToInt = document.getElementById('lockToInt');
+
+    // Preset buttons
+    document.querySelectorAll('button[data-scale]').forEach(btn => {
+      btn.addEventListener('click', ()=>{
+        baseInput.value = Math.round( (window.innerWidth * 0.6) );
+        const s = parseFloat(btn.dataset.scale);
+        // set base to convenient value and calculate using scale
+        calculateWithScale(s);
+      })
+    });
+
+    document.getElementById('fitScreen').addEventListener('click', ()=>{
+      baseInput.value = Math.floor(window.innerWidth * 0.8);
+      calculate();
+    });
+
+    function calculateWithScale(scale){
+      const base = Number(baseInput.value) || 500;
+      let a, b;
+      if(direction.value === 'horizontal'){
+        a = base * scale;
+        b = base;
+      } else {
+        a = base;
+        b = base * scale;
+      }
+      finalize(a,b);
+    }
+
+    function calculate(){
+      let base = Number(baseInput.value);
+      if(!base || base <= 0) base = 500;
+
+      // produce pair (a,b) such that a/b ≈ φ and a + b =? we can choose either a or b as base depending on orientation
+      let a, b;
+      if(direction.value === 'horizontal'){
+        // base is width (a+b), we can derive a = base / φ and b = base - a
+        // but designers usually prefer a = base and b = base/φ (or vice versa). We'll choose a=base, b=base/φ
+        a = base;
+        b = base / PHI;
+      } else {
+        a = base / PHI;
+        b = base;
+      }
+
+      if(lockToInt.checked){ a = Math.round(a); b = Math.round(b); }
+      finalize(a,b);
+    }
+
+    function finalize(a,b){
+      const r = (a / b).toFixed(4);
+      aVal.textContent = formatPx(a);
+      bVal.textContent = formatPx(b);
+      ratioEl.textContent = r + ' (φ ≈ ' + PHI.toFixed(6) + ')';
+      notes.textContent = `Recommendation: use a=${Math.round(a)}px and b=${Math.round(b)}px for spacing or container sizing. Adjust as needed for responsive breakpoints.`;
+      drawPreview(a,b);
+    }
+
+    function formatPx(x){
+      if(Number.isInteger(x)) return x + ' px';
+      return parseFloat(x).toFixed(2) + ' px';
+    }
+
+    function drawPreview(a,b){
+      // draw a simple rectangle pair to visualize the ratio within the SVG (100x100 viewBox)
+      const total = a + b;
+      const wA = (a / total) * 100;
+      const wB = (b / total) * 100;
+
+      // create svg content
+      const show = showGuides.checked;
+      const svgParts = [];
+      svgParts.push(`<rect x="0" y="10" width="${wA}" height="80" fill="rgba(245,158,11,0.9)" rx="2"></rect>`);
+      svgParts.push(`<rect x="${wA}" y="10" width="${wB}" height="80" fill="rgba(2,6,23,0.08)" stroke="rgba(255,255,255,0.03)" rx="2"></rect>`);
+
+      if(show){
+        svgParts.push(`<line x1="${wA}" y1="8" x2="${wA}" y2="92" stroke="rgba(255,255,255,0.06)" stroke-dasharray="2 2"/>`);
+        svgParts.push(`<text x="${wA/2}" y="54" fill="#072033" font-weight="700" font-size="6" text-anchor="middle">a</text>`);
+        svgParts.push(`<text x="${wA + wB/2}" y="54" fill="#072033" font-weight="700" font-size="6" text-anchor="middle">b</text>`);
+      }
+
+      preview.innerHTML = svgParts.join('\n');
+    }
+
+    copyBtn.addEventListener('click', async ()=>{
+      const text = `a: ${aVal.textContent}, b: ${bVal.textContent}, ratio: ${ratioEl.textContent}`;
+      try{
+        await navigator.clipboard.writeText(text);
+        copyBtn.textContent = 'Copied!';
+        setTimeout(()=>copyBtn.textContent = 'Copy results', 1200);
+      }catch(e){
+        alert('Copy failed — your browser may block clipboard access.');
+      }
+    });
+
+    exportBtn.addEventListener('click', ()=>{
+      const csv = `label,value\n a,${aVal.textContent.replace(' px','')}\n b,${bVal.textContent.replace(' px','')}\n ratio,${ratioEl.textContent}`;
+      const blob = new Blob([csv], {type:'text/csv'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'golden-ratio.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    });
+
+    calcBtn.addEventListener('click', calculate);
+
+    // initial
+    calculate();
+  </script>
+</body>
+</html>

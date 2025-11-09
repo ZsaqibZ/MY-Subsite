@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tiling Pattern Calculator — tiling-calculator.html</title>
+  <style>
+    :root{--bg:#0b1220;--card:#0f1724;--muted:#9fb3c8;--accent:#f59e0b;--radius:12px}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;background:linear-gradient(180deg,#041025,#071425);color:#e8f4fb;font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
+    .wrap{max-width:1100px;margin:28px auto;padding:20px}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:18px;border-radius:var(--radius);box-shadow:0 12px 40px rgba(2,6,23,0.6)}
+    header{display:flex;gap:12px;align-items:center}
+    .logo{width:56px;height:56px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#f97316);display:flex;align-items:center;justify-content:center;font-weight:800;color:#072033}
+    h1{margin:0;font-size:18px}
+    p.lead{margin:4px 0 0;color:var(--muted);font-size:13px}
+
+    .grid{display:grid;grid-template-columns:420px 1fr;gap:18px;margin-top:18px}
+    @media (max-width:980px){.grid{grid-template-columns:1fr}}
+    .panel{background:var(--card);padding:14px;border-radius:10px}
+    label{display:block;color:var(--muted);font-size:13px;margin-bottom:6px}
+    input[type=number], select{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
+    .row{display:flex;gap:8px}
+    .btn{padding:10px 12px;border-radius:10px;border:none;cursor:pointer;font-weight:700}
+    .btn-primary{background:var(--accent);color:#072033}
+    .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted)}
+
+    .result{margin-top:12px;display:flex;flex-direction:column;gap:10px}
+    .res-card{background:rgba(255,255,255,0.02);padding:12px;border-radius:8px}
+    .muted{color:var(--muted);font-size:13px}
+
+    .preview{margin-top:12px;border-radius:8px;overflow:hidden;background:linear-gradient(180deg,#071827,#071c2a);padding:12px}
+    canvas{width:100%;height:auto;border-radius:6px;background:#ffffff}
+
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <header>
+        <div class="logo">TP</div>
+        <div>
+          <h1>Tiling Pattern Calculator</h1>
+          <p class="lead">Calculate number of tiles required based on room size, tile size and a waste factor — includes a simple layout preview.</p>
+        </div>
+      </header>
+
+      <div class="grid">
+        <section class="panel">
+          <label>Room dimensions</label>
+          <div class="row">
+            <input id="roomW" type="number" placeholder="Width (ft)" value="12" />
+            <input id="roomL" type="number" placeholder="Length (ft)" value="10" />
+          </div>
+
+          <div style="height:10px"></div>
+          <label>Tile size</label>
+          <div class="row">
+            <input id="tileW" type="number" placeholder="Tile width (in)" value="12" />
+            <input id="tileL" type="number" placeholder="Tile length (in)" value="12" />
+          </div>
+
+          <div style="height:10px"></div>
+          <label>Grout / spacing (mm)</label>
+          <input id="grout" type="number" placeholder="e.g., 3" value="3" />
+
+          <div style="height:10px"></div>
+          <label>Waste factor (%)</label>
+          <input id="waste" type="number" placeholder="e.g., 10" value="10" />
+
+          <div style="height:10px"></div>
+          <label>Orientation</label>
+          <select id="orientation">
+            <option value="straight">Straight (grid)</option>
+            <option value="staggered">Staggered (brick lay)</option>
+          </select>
+
+          <div style="height:12px"></div>
+          <div class="row">
+            <button id="calcBtn" class="btn btn-primary">Calculate</button>
+            <button id="exportBtn" class="btn btn-ghost">Export CSV</button>
+          </div>
+
+          <div class="result" id="results"></div>
+        </section>
+
+        <aside class="panel">
+          <div class="muted">Layout preview</div>
+          <div class="preview">
+            <canvas id="previewCanvas" width="800" height="600"></canvas>
+          </div>
+
+          <div style="height:12px"></div>
+          <div class="muted">Notes</div>
+          <div class="res-card muted">This tool assumes straight or staggered layouts and includes recommended waste factor for cuts (typically 5–15%). Always round up and buy extra for pattern matching and breakage.</div>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const ftToIn = 12;
+    const roomW = document.getElementById('roomW');
+    const roomL = document.getElementById('roomL');
+    const tileW = document.getElementById('tileW');
+    const tileL = document.getElementById('tileL');
+    const grout = document.getElementById('grout');
+    const waste = document.getElementById('waste');
+    const orientation = document.getElementById('orientation');
+    const calcBtn = document.getElementById('calcBtn');
+    const results = document.getElementById('results');
+    const exportBtn = document.getElementById('exportBtn');
+    const canvas = document.getElementById('previewCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function calculateTiles(){
+      // convert room feet to inches
+      const rw = parseFloat(roomW.value) * ftToIn; const rl = parseFloat(roomL.value) * ftToIn;
+      const tw = parseFloat(tileW.value); const tl = parseFloat(tileL.value);
+      const gr = (parseFloat(grout.value) || 0) / 25.4; // mm to inches
+      const wastePct = (parseFloat(waste.value) || 0) / 100;
+
+      // effective tile size including grout
+      const effW = tw + gr; const effL = tl + gr;
+
+      // number across and down for straight layout
+      const countAcross = Math.ceil(rw / effW);
+      const countDown = Math.ceil(rl / effL);
+      const totalStraight = countAcross * countDown;
+
+      let total = totalStraight;
+      if(orientation.value === 'staggered'){
+        // staggered increases cuts: assume +8% more tiles required for typical brick stagger
+        total = Math.ceil(totalStraight * 1.08);
+      }
+
+      const withWaste = Math.ceil(total * (1 + wastePct));
+
+      // calculate tile area and needed boxes assumption: user can provide tiles per box, but we skip — report tiles count
+      const summary = {
+        countAcross, countDown, totalStraight, orientation: orientation.value, total, withWaste
+      };
+      return summary;
+    }
+
+    function renderResults(){
+      const s = calculateTiles();
+      results.innerHTML = '';
+      const card = document.createElement('div'); card.className='res-card';
+      card.innerHTML = `
+        <div><strong>Grid size:</strong> ${s.countAcross} across × ${s.countDown} down</div>
+        <div><strong>Tiles (no waste):</strong> ${s.totalStraight} pcs</div>
+        <div><strong>Layout adjustment (${s.orientation}):</strong> ${s.total} pcs</div>
+        <div><strong>With waste:</strong> ${s.withWaste} pcs</div>
+      `;
+      results.appendChild(card);
+      drawPreview();
+    }
+
+    function drawPreview(){
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      // draw room border
+      ctx.fillStyle = '#07192a'; ctx.fillRect(0,0,canvas.width,canvas.height);
+      ctx.strokeStyle = '#163248'; ctx.lineWidth = 4; ctx.strokeRect(20,20,canvas.width-40,canvas.height-40);
+
+      const s = calculateTiles();
+      // compute tile size in canvas coordinates
+      const rw = parseFloat(roomW.value) * ftToIn; const rl = parseFloat(roomL.value) * ftToIn;
+      const tw = parseFloat(tileW.value); const tl = parseFloat(tileL.value);
+      const gr = (parseFloat(grout.value) || 0) / 25.4;
+      const effW = tw + gr; const effL = tl + gr;
+
+      // scale to fit canvas inner area
+      const innerW = canvas.width - 80; const innerH = canvas.height - 80;
+      const scale = Math.min(innerW / rw, innerH / rl);
+      const pxTileW = effW * scale; const pxTileL = effL * scale;
+
+      // draw tiles
+      ctx.fillStyle = '#0ea5a;';
+      ctx.strokeStyle = '#0f1724'; ctx.lineWidth = 1;
+
+      const cols = s.countAcross; const rows = s.countDown;
+      for(let r=0;r<rows;r++){
+        for(let c=0;c<cols;c++){
+          let x = 40 + c*pxTileW; let y = 40 + r*pxTileL;
+          if(orientation.value === 'staggered' && (r % 2 === 1)) x += pxTileW/2;
+          ctx.fillStyle = ( (c+r) % 2 === 0) ? '#f59e0b' : '#fbbf24';
+          ctx.fillRect(x,y,pxTileW-1,pxTileL-1);
+          ctx.strokeStyle = '#0b1220'; ctx.strokeRect(x,y,pxTileW-1,pxTileL-1);
+        }
+      }
+
+      // overlay text
+      ctx.fillStyle = '#e6eef6'; ctx.font = '16px Inter, Arial'; ctx.fillText('Preview (not to scale)', 24, 30);
+    }
+
+    calcBtn.addEventListener('click', renderResults);
+
+    exportBtn.addEventListener('click', ()=>{
+      const s = calculateTiles();
+      const csv = `label,value\ncountAcross,${s.countAcross}\ncountDown,${s.countDown}\ntotalNoWaste,${s.totalStraight}\ntotalLayout,${s.total}\ntotalWithWaste,${s.withWaste}\n`;
+      const blob = new Blob([csv], {type:'text/csv'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'tiling-summary.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    });
+
+    // initial render
+    renderResults();
+  </script>
+</body>
+</html>

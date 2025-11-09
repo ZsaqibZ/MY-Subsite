@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mood Board Creator — mood-board.html</title>
+  <style>
+    :root{--bg:#0b1020;--panel:#0f1724;--muted:#9fb3c8;--accent:#06b6d4;--radius:12px}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;background:linear-gradient(180deg,#071022,#061421);color:#e6f6fb;font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
+    .wrap{max-width:1100px;margin:28px auto;padding:18px}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:18px;border-radius:var(--radius);box-shadow:0 10px 40px rgba(2,6,23,0.6)}
+    header{display:flex;gap:12px;align-items:center}
+    .logo{width:56px;height:56px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#2563eb);display:flex;align-items:center;justify-content:center;font-weight:800;color:#012}
+    h1{margin:0;font-size:18px}
+    p.lead{margin:4px 0 0;color:var(--muted);font-size:13px}
+
+    .grid{display:grid;grid-template-columns:360px 1fr;gap:18px;margin-top:18px}
+    @media (max-width:980px){.grid{grid-template-columns:1fr}}
+    .panel{background:var(--panel);padding:14px;border-radius:10px}
+    label{font-size:13px;color:var(--muted);display:block;margin-bottom:8px}
+    input[type=file]{display:block}
+    .controls{display:flex;gap:8px;margin-top:10px}
+    .btn{padding:10px 12px;border-radius:10px;border:none;cursor:pointer;font-weight:700}
+    .btn-primary{background:var(--accent);color:#021022}
+    .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted)}
+
+    .board{background:linear-gradient(180deg,#071020,#081827);padding:12px;border-radius:8px;min-height:360px}
+    .grid-board{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
+    .tile{background:rgba(255,255,255,0.02);border-radius:8px;padding:8px;display:flex;flex-direction:column;gap:8px}
+    .tile img{width:100%;height:120px;object-fit:cover;border-radius:6px}
+    .caption{background:rgba(0,0,0,0.2);padding:6px;border-radius:6px;font-size:13px}
+    .small{font-size:12px;color:var(--muted)}
+    .input-inline{display:flex;gap:8px}
+    .input-inline input{flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <header>
+        <div class="logo">MB</div>
+        <div>
+          <h1>Mood Board Creator</h1>
+          <p class="lead">Simple grid-style mood board — upload images, add captions, rearrange order, and export the board as an image.</p>
+        </div>
+      </header>
+
+      <div class="grid">
+        <aside class="panel">
+          <label for="files">Upload images</label>
+          <input id="files" type="file" accept="image/*" multiple />
+          <div style="height:10px"></div>
+          <label>Board columns</label>
+          <div class="input-inline">
+            <input id="cols" type="number" value="4" min="1" max="6" />
+            <button id="applyCols" class="btn btn-ghost">Apply</button>
+          </div>
+
+          <div style="height:10px"></div>
+          <label>Arrange</label>
+          <div class="controls">
+            <button id="sortAsc" class="btn btn-ghost">Sort A→Z</button>
+            <button id="sortDesc" class="btn btn-ghost">Sort Z→A</button>
+          </div>
+
+          <div style="height:10px"></div>
+          <label>Export</label>
+          <div class="controls">
+            <button id="exportPng" class="btn btn-primary">Export PNG</button>
+            <button id="clearBoard" class="btn btn-ghost">Clear</button>
+          </div>
+
+          <div style="height:12px"></div>
+          <div class="small">Tip: Add short captions to guide the visual theme. Exported PNG is high-resolution for presentations.</div>
+        </aside>
+
+        <main class="panel">
+          <div class="board" id="board">
+            <div id="gridBoard" class="grid-board" style="grid-template-columns:repeat(4,1fr)"></div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const filesInput = document.getElementById('files');
+    const gridBoard = document.getElementById('gridBoard');
+    const colsInput = document.getElementById('cols');
+    const applyCols = document.getElementById('applyCols');
+    const sortAsc = document.getElementById('sortAsc');
+    const sortDesc = document.getElementById('sortDesc');
+    const exportPng = document.getElementById('exportPng');
+    const clearBoard = document.getElementById('clearBoard');
+
+    let items = []; // {id, name, dataURL, caption}
+
+    function renderBoard(){
+      gridBoard.innerHTML = '';
+      items.forEach(item=>{
+        const tile = document.createElement('div'); tile.className='tile';
+        const img = document.createElement('img'); img.src = item.dataURL; img.alt = item.name;
+        const caption = document.createElement('div'); caption.className='caption'; caption.contentEditable = true; caption.textContent = item.caption || '';
+        caption.addEventListener('input', ()=> item.caption = caption.textContent);
+        const meta = document.createElement('div'); meta.className='small'; meta.textContent = item.name;
+        tile.appendChild(img); tile.appendChild(caption); tile.appendChild(meta);
+        gridBoard.appendChild(tile);
+      });
+    }
+
+    filesInput.addEventListener('change', async (e)=>{
+      const files = Array.from(e.target.files || []);
+      for(const f of files){
+        if(!f.type.startsWith('image/')) continue;
+        const dataURL = await readFileAsDataURL(f);
+        items.push({id:crypto.randomUUID(), name:f.name, dataURL, caption:''});
+      }
+      renderBoard();
+    });
+
+    function readFileAsDataURL(file){ return new Promise((res, rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(file); }); }
+
+    applyCols.addEventListener('click', ()=>{
+      const c = Math.max(1, Math.min(6, parseInt(colsInput.value||4,10)));
+      gridBoard.style.gridTemplateColumns = `repeat(${c},1fr)`;
+    });
+
+    sortAsc.addEventListener('click', ()=>{ items.sort((a,b)=> a.name.localeCompare(b.name)); renderBoard(); });
+    sortDesc.addEventListener('click', ()=>{ items.sort((a,b)=> b.name.localeCompare(a.name)); renderBoard(); });
+
+    clearBoard.addEventListener('click', ()=>{ if(confirm('Clear all images from the board?')){ items=[]; renderBoard(); } });
+
+    exportPng.addEventListener('click', async ()=>{
+      if(items.length===0){ alert('Board is empty'); return; }
+      // create a canvas large enough to hold the grid at 2x scale for quality
+      const cols = parseInt(getComputedStyle(gridBoard).gridTemplateColumns.split(' ').length || colsInput.value || 4,10);
+      const tileWidth = 600; const tileHeight = 420; // base tile size
+      const rows = Math.ceil(items.length / cols);
+      const canvas = document.createElement('canvas'); canvas.width = cols * tileWidth; canvas.height = rows * tileHeight;
+      const ctx = canvas.getContext('2d'); ctx.fillStyle = '#0b1020'; ctx.fillRect(0,0,canvas.width,canvas.height);
+
+      // draw items in order
+      for(let i=0;i<items.length;i++){
+        const r = Math.floor(i/cols); const c = i % cols; const x = c*tileWidth; const y = r*tileHeight;
+        // draw image
+        const img = await loadImage(items[i].dataURL);
+        // cover strategy
+        const iw = img.naturalWidth, ih = img.naturalHeight; const rscale = Math.max(tileWidth/iw, (tileHeight-120)/ih);
+        const dw = iw * rscale, dh = ih * rscale; const dx = x + (tileWidth - dw)/2; const dy = y + 10;
+        ctx.drawImage(img, dx, dy, dw, dh);
+        // caption
+        ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(x+10, y + tileHeight - 90, tileWidth-20, 60);
+        ctx.fillStyle = '#ffffff'; ctx.font = '28px Inter, Arial'; ctx.fillText(items[i].caption || '', x+20, y + tileHeight - 45);
+        // name small
+        ctx.fillStyle='rgba(255,255,255,0.6)'; ctx.font='16px Inter, Arial'; ctx.fillText(items[i].name, x+20, y + tileHeight - 18);
+      }
+
+      const url = canvas.toDataURL('image/png');
+      const a = document.createElement('a'); a.href = url; a.download = 'mood-board.png'; document.body.appendChild(a); a.click(); a.remove();
+    });
+
+    function loadImage(src){ return new Promise((res, rej)=>{ const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=src; }); }
+  </script>
+</body>
+</html>

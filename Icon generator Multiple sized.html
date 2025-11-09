@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Icon Size Generator — icon-generator.html</title>
+  <style>
+    :root{--bg:#0b1020;--card:#0f1724;--muted:#9fb3c8;--accent:#06b6d4;--glass:rgba(255,255,255,0.03);--radius:12px}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;background:linear-gradient(180deg,#071022,#061421);color:#e6f6fb;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+    .wrap{max-width:1100px;margin:32px auto;padding:20px}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:18px;border-radius:var(--radius);box-shadow:0 10px 40px rgba(2,6,23,0.6)}
+    header{display:flex;gap:12px;align-items:center}
+    .logo{width:56px;height:56px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#2563eb);display:flex;align-items:center;justify-content:center;font-weight:800;color:#012;}
+    h1{margin:0;font-size:18px}
+    p.lead{margin:4px 0 0;color:var(--muted);font-size:13px}
+
+    .grid{display:grid;grid-template-columns:360px 1fr;gap:18px;margin-top:18px}
+    @media (max-width:980px){.grid{grid-template-columns:1fr}}
+    .panel{background:var(--card);padding:14px;border-radius:10px}
+    input[type=file]{display:block}
+    .drop{border:2px dashed rgba(255,255,255,0.04);padding:18px;border-radius:10px;text-align:center;cursor:pointer}
+    .options{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+    label{font-size:13px;color:var(--muted)}
+    select,input[type=number],input[type=color]{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit}
+    .sizes{display:flex;flex-wrap:wrap;gap:8px}
+    .size-chip{padding:8px 10px;border-radius:8px;background:rgba(255,255,255,0.02);cursor:pointer}
+    .controls{display:flex;gap:8px;margin-top:12px}
+    .btn{padding:10px 12px;border-radius:10px;border:none;cursor:pointer;font-weight:700}
+    .btn-primary{background:var(--accent);color:#021022}
+    .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted)}
+
+    .preview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px;margin-top:12px}
+    .preview-card{background:var(--glass);padding:10px;border-radius:8px;text-align:center}
+    .preview-card img{width:64px;height:64px;object-fit:contain;border-radius:8px;background:rgba(255,255,255,0.02)}
+    .muted{color:var(--muted);font-size:13px}
+    .small{font-size:12px;color:var(--muted)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <header>
+        <div class="logo">IC</div>
+        <div>
+          <h1>Icon Size Generator</h1>
+          <p class="lead">Resize any uploaded image to common icon sizes and download each variant. Client-side, private — no upload to server.</p>
+        </div>
+      </header>
+
+      <div class="grid">
+        <aside class="panel">
+          <div id="drop" class="drop">Drag & drop an image here or <label for="fileInput" style="color:var(--accent);cursor:pointer">choose a file</label>
+            <input id="fileInput" type="file" accept="image/*" style="display:none" />
+          </div>
+
+          <div class="options">
+            <label>Output sizes (px) — toggle chips or add custom</label>
+            <div class="sizes" id="sizeChips"></div>
+            <div style="display:flex;gap:8px">
+              <input id="customSize" type="number" placeholder="Custom size (e.g., 512)" />
+              <button id="addSize" class="btn btn-ghost">Add</button>
+            </div>
+
+            <label>Background (for transparent sources)</label>
+            <input id="bgColor" type="color" value="#ffffff" />
+
+            <label>Format</label>
+            <select id="format">
+              <option value="png">PNG</option>
+              <option value="webp">WEBP</option>
+            </select>
+
+            <label class="small">Options</label>
+            <div style="display:flex;gap:8px;align-items:center">
+              <label class="small"><input id="preserveAspect" type="checkbox" checked/> Preserve aspect</label>
+              <label class="small"><input id="padToSquare" type="checkbox" checked/> Pad to square</label>
+            </div>
+
+            <div class="controls">
+              <button id="generateBtn" class="btn btn-primary">Generate Icons</button>
+              <button id="clearBtn" class="btn btn-ghost">Clear</button>
+            </div>
+
+            <div style="height:10px"></div>
+            <div class="muted">Tip: For favicons use 16×16 and 32×32. For app icons include 64, 128, 256, 512.</div>
+          </div>
+        </aside>
+
+        <main class="panel">
+          <div id="meta" class="muted">No image selected.</div>
+          <div id="previewGrid" class="preview-grid"></div>
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // defaults
+    const defaultSizes = [16,32,48,64,128,256,512];
+    const sizeChips = document.getElementById('sizeChips');
+    const customSize = document.getElementById('customSize');
+    const addSizeBtn = document.getElementById('addSize');
+    const formatSel = document.getElementById('format');
+    const bgColor = document.getElementById('bgColor');
+    const preserveAspect = document.getElementById('preserveAspect');
+    const padToSquare = document.getElementById('padToSquare');
+    const generateBtn = document.getElementById('generateBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const previewGrid = document.getElementById('previewGrid');
+    const meta = document.getElementById('meta');
+
+    let sizes = new Set(defaultSizes);
+    let imageFile = null;
+    let imageBitmap = null;
+
+    function renderChips(){
+      sizeChips.innerHTML='';
+      Array.from(sizes).sort((a,b)=>a-b).forEach(s=>{
+        const chip = document.createElement('div'); chip.className='size-chip'; chip.textContent=s+'px';
+        chip.addEventListener('click', ()=>{
+          if(sizes.has(s)) sizes.delete(s); else sizes.add(s); renderChips();
+        });
+        sizeChips.appendChild(chip);
+      });
+    }
+    renderChips();
+
+    addSizeBtn.addEventListener('click', ()=>{
+      const v = parseInt(customSize.value,10);
+      if(!v || v<=0) return; sizes.add(v); customSize.value=''; renderChips();
+    });
+
+    // drag & drop
+    const drop = document.getElementById('drop');
+    const fileInput = document.getElementById('fileInput');
+    drop.addEventListener('dragover', e=>{ e.preventDefault(); drop.style.borderColor='rgba(255,255,255,0.12)'; });
+    drop.addEventListener('dragleave', e=>{ e.preventDefault(); drop.style.borderColor=''; });
+    drop.addEventListener('drop', e=>{ e.preventDefault(); drop.style.borderColor=''; const f = e.dataTransfer.files[0]; handleFile(f); });
+    fileInput.addEventListener('change', e=> handleFile(e.target.files[0]));
+
+    function handleFile(file){
+      if(!file) return; if(!file.type.startsWith('image/')){ alert('Please provide an image file'); return; }
+      imageFile = file; meta.textContent = `Selected: ${file.name} — ${Math.round(file.size/1024)} KB`;
+      createImageBitmap(file).then(bmp=>{ imageBitmap = bmp; showPreviewThumb(bmp); }).catch(()=>{
+        // fallback to img
+        const reader = new FileReader(); reader.onload = ()=>{
+          const img = new Image(); img.onload = ()=>{ imageBitmap = img; showPreviewThumb(img); }; img.src = reader.result;
+        }; reader.readAsDataURL(file);
+      });
+    }
+
+    function showPreviewThumb(img){
+      previewGrid.innerHTML = '';
+      const card = document.createElement('div'); card.className='preview-card';
+      const el = document.createElement('img'); el.src = toDataURLFromImage(img,64,64,'png', true);
+      card.appendChild(el);
+      const info = document.createElement('div'); info.className='small muted'; info.textContent = `${img.width}×${img.height}`;
+      card.appendChild(info);
+      previewGrid.appendChild(card);
+    }
+
+    // helper: draw to canvas and return dataURL
+    function drawToCanvas(img, outSize, options){
+      const canvas = document.createElement('canvas'); canvas.width = outSize; canvas.height = outSize; const ctx = canvas.getContext('2d');
+      // background
+      ctx.fillStyle = options.bg; ctx.fillRect(0,0,canvas.width,canvas.height);
+
+      // calculate draw size
+      let dw = outSize, dh = outSize, dx=0, dy=0;
+      if(options.preserve){
+        const iw = img.width || img.naturalWidth; const ih = img.height || img.naturalHeight;
+        const r = Math.min(outSize/iw, outSize/ih);
+        dw = Math.round(iw * r); dh = Math.round(ih * r);
+        dx = Math.round((outSize - dw)/2); dy = Math.round((outSize - dh)/2);
+      }
+      ctx.drawImage(img, dx, dy, dw, dh);
+      return canvas.toDataURL('image/'+options.format);
+    }
+
+    // small helper for preview thumb using offscreen draw
+    function toDataURLFromImage(img, w, h, fmt, keepAspect){
+      const canvas = document.createElement('canvas'); canvas.width=w; canvas.height=h; const ctx=canvas.getContext('2d'); ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,w,h);
+      let iw = img.width || img.naturalWidth; let ih = img.height || img.naturalHeight;
+      if(keepAspect){ const r = Math.min(w/iw, h/ih); const dw = Math.round(iw*r), dh=Math.round(ih*r); ctx.drawImage(img, Math.round((w-dw)/2), Math.round((h-dh)/2), dw, dh); }
+      else ctx.drawImage(img,0,0,w,h);
+      return canvas.toDataURL('image/'+fmt);
+    }
+
+    // generate icons
+    generateBtn.addEventListener('click', async ()=>{
+      if(!imageBitmap){ alert('Please select an image first'); return; }
+      previewGrid.innerHTML='';
+      const outFormat = formatSel.value; const bg = bgColor.value; const preserve = preserveAspect.checked; const pad = padToSquare.checked;
+      const arr = Array.from(sizes).sort((a,b)=>a-b);
+      for(const s of arr){
+        // create canvas
+        const canvas = document.createElement('canvas'); canvas.width = s; canvas.height = s; const ctx = canvas.getContext('2d');
+        // fill bg
+        ctx.fillStyle = bg; ctx.fillRect(0,0,s,s);
+
+        // compute draw dimensions
+        const iw = imageBitmap.width || imageBitmap.naturalWidth; const ih = imageBitmap.height || imageBitmap.naturalHeight;
+        let dw=s, dh=s, dx=0, dy=0;
+        if(preserve){ const r = Math.min(s/iw, s/ih); dw = Math.round(iw*r); dh = Math.round(ih*r); dx = Math.round((s-dw)/2); dy = Math.round((s-dh)/2); }
+        ctx.drawImage(imageBitmap, dx, dy, dw, dh);
+
+        const dataURL = canvas.toDataURL('image/'+outFormat);
+        // preview card
+        const card = document.createElement('div'); card.className='preview-card';
+        const img = document.createElement('img'); img.src = dataURL; img.width=64; img.height=64;
+        const label = document.createElement('div'); label.className='small muted'; label.textContent = s + '×' + s;
+        const dl = document.createElement('a'); dl.className='btn btn-ghost'; dl.style.display='inline-block'; dl.style.marginTop='8px'; dl.textContent='Download';
+        // filename
+        const baseName = (imageFile && imageFile.name) ? imageFile.name.replace(/\.[^/.]+$/, '') : 'icon';
+        dl.href = dataURL; dl.download = `${baseName}-${s}x${s}.${outFormat}`;
+
+        card.appendChild(img); card.appendChild(label); card.appendChild(dl);
+        previewGrid.appendChild(card);
+      }
+    });
+
+    clearBtn.addEventListener('click', ()=>{
+      imageFile=null; imageBitmap=null; previewGrid.innerHTML=''; meta.textContent='No image selected.'; sizes = new Set(defaultSizes); renderChips();
+    });
+
+    // expose draw helper in case createImageBitmap provided ImageBitmap vs HTMLImageElement
+    window.drawToCanvas = drawToCanvas;
+  </script>
+</body>
+</html>
